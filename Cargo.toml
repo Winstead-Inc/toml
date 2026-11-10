@@ -10,7 +10,7 @@ rust-version = "1.85" # MSRV
 include = ["/build.rs", "/src/**/*", "/Cargo.toml", "/Cargo.lock", "/LICENSE*", "/README.md", "/examples/**/*"]
 
 [workspace.lints.rust]
-rust_2018_idioms = { level = "warn", priority = -1 }
+rust_2018_idioms = "warn"
 
 non_ascii_idents = "warn"
 trivial_numeric_casts = "warn"
