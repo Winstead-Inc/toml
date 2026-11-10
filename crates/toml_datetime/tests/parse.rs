@@ -1,17 +1,22 @@
-use snapbox::prelude::*;
+use snapbox::prelude:: * ;
 use snapbox::str;
 
 #[track_caller]
-fn t(input: &str, expected: impl IntoData) {
+fn t(input: & str, expected: impl IntoData)
+{
     let actual = input.parse::<toml_datetime::Datetime>();
     snapbox::assert_data_eq!(actual.to_debug(), expected.raw());
 }
 
 #[test]
-fn only_t() {
-    t(
+fn only_t()
+{
+    t
+    (
         "T",
-        str![[r#"
+        str!
+        [[
+            r#"
 Err(
     DatetimeParseError {
         what: None,
@@ -21,15 +26,20 @@ Err(
     },
 )
 
-"#]],
+"#
+        ]],
     );
 }
 
 #[test]
-fn only_tz() {
-    t(
+fn only_tz()
+{
+    t
+    (
         "TZ",
-        str![[r#"
+        str!
+        [[
+            r#"
 Err(
     DatetimeParseError {
         what: None,
@@ -39,15 +49,20 @@ Err(
     },
 )
 
-"#]],
+"#
+        ]],
     );
 }
 
 #[test]
-fn only_tz_dot() {
-    t(
+fn only_tz_dot()
+{
+    t
+    (
         "TZ.",
-        str![[r#"
+        str!
+        [[
+            r#"
 Err(
     DatetimeParseError {
         what: None,
@@ -57,15 +72,20 @@ Err(
     },
 )
 
-"#]],
+"#
+        ]],
     );
 }
 
 #[test]
-fn time_without_seconds() {
-    t(
+fn time_without_seconds()
+{
+    t
+    (
         "13:37",
-        str![[r#"
+        str!
+        [[
+            r#"
 Ok(
     Datetime {
         date: None,
@@ -81,15 +101,20 @@ Ok(
     },
 )
 
-"#]],
+"#
+        ]],
     );
 }
 
 #[test]
-fn time_without_seconds_with_nanoseconds() {
-    t(
+fn time_without_seconds_with_nanoseconds()
+{
+    t
+    (
         "13:37.0",
-        str![[r#"
+        str!
+        [[
+            r#"
 Err(
     DatetimeParseError {
         what: None,
@@ -97,15 +122,20 @@ Err(
     },
 )
 
-"#]],
+"#
+        ]],
     );
 }
 
 #[test]
-fn datetime_without_seconds() {
-    t(
+fn datetime_without_seconds()
+{
+    t
+    (
         "1979-05-27 07:32Z",
-        str![[r#"
+        str!
+        [[
+            r#"
 Ok(
     Datetime {
         date: Some(
@@ -129,6 +159,7 @@ Ok(
     },
 )
 
-"#]],
+"#
+        ]],
     );
 }

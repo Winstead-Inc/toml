@@ -67,6 +67,7 @@ mod write;
 
 pub use integer::TomlInteger;
 pub use integer::TomlIntegerFormat;
+
 #[cfg(feature = "alloc")]
 pub use key::ToTomlKey;
 pub use key::WriteTomlKey;
@@ -74,11 +75,12 @@ pub use string::TomlKey;
 pub use string::TomlKeyBuilder;
 pub use string::TomlString;
 pub use string::TomlStringBuilder;
+
 #[cfg(feature = "alloc")]
 pub use value::ToTomlValue;
 pub use value::WriteTomlValue;
 pub use write::TomlWrite;
 
-#[doc = include_str!("../README.md")]
+#[doc = include_str ! ("../README.md")]
 #[cfg(doctest)]
 pub struct ReadmeDoctests;

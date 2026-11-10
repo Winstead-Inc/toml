@@ -102,33 +102,29 @@ pub mod ser;
 pub mod visit;
 pub mod visit_mut;
 
-pub use crate::array::{Array, ArrayIntoIter, ArrayIter, ArrayIterMut};
-pub use crate::array_of_tables::{
-    ArrayOfTables, ArrayOfTablesIntoIter, ArrayOfTablesIter, ArrayOfTablesIterMut,
-};
+pub use crate::array:: { Array, ArrayIntoIter, ArrayIter, ArrayIterMut };
+pub use crate::array_of_tables:: { ArrayOfTables, ArrayOfTablesIntoIter, ArrayOfTablesIter, ArrayOfTablesIterMut, };
 pub use crate::document::DocumentMut;
+
 /// Type representing a parsed TOML document
 #[deprecated(since = "0.23.0", note = "Replaced with `Document`")]
-pub type ImDocument<S> = Document<S>;
+pub type ImDocument < S > = Document<S>;
 pub use crate::document::Document;
 pub use crate::error::TomlError;
-pub use crate::inline_table::{
-    InlineEntry, InlineOccupiedEntry, InlineTable, InlineTableIntoIter, InlineTableIter,
-    InlineTableIterMut, InlineVacantEntry,
-};
-pub use crate::item::{Item, array, table, value};
-pub use crate::key::{Key, KeyMut};
+pub use crate::inline_table:: { InlineEntry, InlineOccupiedEntry, InlineTable, InlineTableIntoIter, InlineTableIter, InlineTableIterMut, InlineVacantEntry, };
+pub use crate::item:: { Item, array, table, value };
+pub use crate::key:: { Key, KeyMut };
 pub use crate::raw_string::RawString;
-pub use crate::repr::{Decor, Formatted, Repr};
-pub use crate::table::{
-    Entry, IntoIter, Iter, IterMut, OccupiedEntry, Table, TableLike, VacantEntry,
-};
+pub use crate::repr:: { Decor, Formatted, Repr };
+pub use crate::table:: { Entry, IntoIter, Iter, IterMut, OccupiedEntry, Table, TableLike, VacantEntry, };
 pub use crate::value::Value;
-pub use toml_datetime::*;
+pub use toml_datetime:: * ;
 
 // Prevent users from some traits.
-pub(crate) mod private {
+pub (crate) mod private
+{
     pub trait Sealed {}
+
     impl Sealed for usize {}
     impl Sealed for str {}
     impl Sealed for String {}
@@ -136,12 +132,12 @@ pub(crate) mod private {
     impl Sealed for f64 {}
     impl Sealed for bool {}
     impl Sealed for crate::Datetime {}
-    impl<T: ?Sized> Sealed for &T where T: Sealed {}
+    impl <T: ? Sized> Sealed for & T where T: Sealed {}
     impl Sealed for crate::Table {}
     impl Sealed for crate::InlineTable {}
 }
 
-#[doc = include_str!("../README.md")]
+#[doc = include_str ! ("../README.md")]
 #[cfg(doctest)]
 #[cfg(feature = "display")]
 #[cfg(feature = "parse")]

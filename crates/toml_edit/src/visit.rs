@@ -74,84 +74,53 @@
 //! For a more complex example where the visitor has internal state, see `examples/visit.rs`
 //! [on GitHub](https://github.com/toml-rs/toml/blob/main/crates/toml_edit/examples/visit.rs).
 
-use crate::{
-    Array, ArrayOfTables, Datetime, DocumentMut, Formatted, InlineTable, Item, Table, TableLike,
-    Value,
-};
+use crate:: { Array, ArrayOfTables, Datetime, DocumentMut, Formatted, InlineTable, Item, Table, TableLike, Value, };
 
 /// Document tree traversal to mutate an exclusive borrow of a document tree in-place.
 ///
 /// See the [module documentation](self) for details.
-pub trait Visit<'doc> {
-    fn visit_document(&mut self, node: &'doc DocumentMut) {
-        visit_document(self, node);
-    }
+pub trait Visit<'doc>
+{
+    fn visit_document( & mut self, node: & 'doc DocumentMut) { visit_document(self, node); }
 
-    fn visit_item(&mut self, node: &'doc Item) {
-        visit_item(self, node);
-    }
+    fn visit_item( & mut self, node: & 'doc Item) { visit_item(self, node); }
 
-    fn visit_table(&mut self, node: &'doc Table) {
-        visit_table(self, node);
-    }
+    fn visit_table( & mut self, node: & 'doc Table) { visit_table(self, node); }
 
-    fn visit_inline_table(&mut self, node: &'doc InlineTable) {
-        visit_inline_table(self, node);
-    }
+    fn visit_inline_table( & mut self, node: & 'doc InlineTable) { visit_inline_table(self, node); }
 
-    fn visit_table_like(&mut self, node: &'doc dyn TableLike) {
-        visit_table_like(self, node);
-    }
+    fn visit_table_like( & mut self, node: & 'doc dyn TableLike) { visit_table_like(self, node); }
 
-    fn visit_table_like_kv(&mut self, key: &'doc str, node: &'doc Item) {
-        visit_table_like_kv(self, key, node);
-    }
+    fn visit_table_like_kv( & mut self, key: & 'doc str, node: & 'doc Item) { visit_table_like_kv(self, key, node); }
 
-    fn visit_array(&mut self, node: &'doc Array) {
-        visit_array(self, node);
-    }
+    fn visit_array( & mut self, node: & 'doc Array) { visit_array(self, node); }
 
-    fn visit_array_of_tables(&mut self, node: &'doc ArrayOfTables) {
-        visit_array_of_tables(self, node);
-    }
+    fn visit_array_of_tables( & mut self, node: & 'doc ArrayOfTables) { visit_array_of_tables(self, node); }
 
-    fn visit_value(&mut self, node: &'doc Value) {
-        visit_value(self, node);
-    }
+    fn visit_value( & mut self, node: & 'doc Value) { visit_value(self, node); }
 
-    fn visit_boolean(&mut self, node: &'doc Formatted<bool>) {
-        visit_boolean(self, node);
-    }
+    fn visit_boolean( & mut self, node: & 'doc Formatted<bool>) { visit_boolean(self, node); }
 
-    fn visit_datetime(&mut self, node: &'doc Formatted<Datetime>) {
-        visit_datetime(self, node);
-    }
+    fn visit_datetime( & mut self, node: & 'doc Formatted<Datetime>) { visit_datetime(self, node); }
 
-    fn visit_float(&mut self, node: &'doc Formatted<f64>) {
-        visit_float(self, node);
-    }
+    fn visit_float( & mut self, node: & 'doc Formatted<f64>) { visit_float(self, node); }
 
-    fn visit_integer(&mut self, node: &'doc Formatted<i64>) {
-        visit_integer(self, node);
-    }
+    fn visit_integer( & mut self, node: & 'doc Formatted<i64>) { visit_integer(self, node); }
 
-    fn visit_string(&mut self, node: &'doc Formatted<String>) {
-        visit_string(self, node);
-    }
+    fn visit_string( & mut self, node: & 'doc Formatted<String>) { visit_string(self, node); }
 }
 
-pub fn visit_document<'doc, V>(v: &mut V, node: &'doc DocumentMut)
+pub fn visit_document<'doc, V>(v: & mut V, node: & 'doc DocumentMut)
 where
-    V: Visit<'doc> + ?Sized,
-{
-    v.visit_table(node.as_table());
-}
+V: Visit < 'doc > + ? Sized,
+{ v.visit_table(node.as_table()); }
 
-pub fn visit_item<'doc, V>(v: &mut V, node: &'doc Item)
+pub fn visit_item<'doc, V>(v: & mut V, node: & 'doc Item)
 where
-    V: Visit<'doc> + ?Sized,
+V: Visit < 'doc > + ? Sized,
 {
-    match node {
+    match node
+    {
         Item::None => {}
         Item::Value(value) => v.visit_value(value),
         Item::Table(table) => v.visit_table(table),
@@ -159,59 +128,42 @@ where
     }
 }
 
-pub fn visit_table<'doc, V>(v: &mut V, node: &'doc Table)
+pub fn visit_table<'doc, V>(v: & mut V, node: & 'doc Table)
 where
-    V: Visit<'doc> + ?Sized,
-{
-    v.visit_table_like(node);
-}
+V: Visit < 'doc > + ? Sized,
+{ v.visit_table_like(node); }
 
-pub fn visit_inline_table<'doc, V>(v: &mut V, node: &'doc InlineTable)
+pub fn visit_inline_table<'doc, V>(v: & mut V, node: & 'doc InlineTable)
 where
-    V: Visit<'doc> + ?Sized,
-{
-    v.visit_table_like(node);
-}
+V: Visit < 'doc > + ? Sized,
+{ v.visit_table_like(node); }
 
-pub fn visit_table_like<'doc, V>(v: &mut V, node: &'doc dyn TableLike)
+pub fn visit_table_like<'doc, V>(v: & mut V, node: & 'doc dyn TableLike)
 where
-    V: Visit<'doc> + ?Sized,
-{
-    for (key, item) in node.iter() {
-        v.visit_table_like_kv(key, item);
-    }
-}
+V: Visit < 'doc > + ? Sized,
+{ for (key, item) in node.iter() { v.visit_table_like_kv(key, item); } }
 
-pub fn visit_table_like_kv<'doc, V>(v: &mut V, _key: &'doc str, node: &'doc Item)
+pub fn visit_table_like_kv<'doc, V>(v: & mut V, _key: & 'doc str, node: & 'doc Item)
 where
-    V: Visit<'doc> + ?Sized,
-{
-    v.visit_item(node);
-}
+V: Visit < 'doc > + ? Sized,
+{ v.visit_item(node); }
 
-pub fn visit_array<'doc, V>(v: &mut V, node: &'doc Array)
+pub fn visit_array<'doc, V>(v: & mut V, node: & 'doc Array)
 where
-    V: Visit<'doc> + ?Sized,
-{
-    for value in node.iter() {
-        v.visit_value(value);
-    }
-}
+V: Visit < 'doc > + ? Sized,
+{ for value in node.iter() { v.visit_value(value); } }
 
-pub fn visit_array_of_tables<'doc, V>(v: &mut V, node: &'doc ArrayOfTables)
+pub fn visit_array_of_tables<'doc, V>(v: & mut V, node: & 'doc ArrayOfTables)
 where
-    V: Visit<'doc> + ?Sized,
-{
-    for table in node.iter() {
-        v.visit_table(table);
-    }
-}
+V: Visit < 'doc > + ? Sized,
+{ for table in node.iter() { v.visit_table(table); } }
 
-pub fn visit_value<'doc, V>(v: &mut V, node: &'doc Value)
+pub fn visit_value<'doc, V>(v: & mut V, node: & 'doc Value)
 where
-    V: Visit<'doc> + ?Sized,
+V: Visit < 'doc > + ? Sized,
 {
-    match node {
+    match node
+    {
         Value::String(s) => v.visit_string(s),
         Value::Integer(i) => v.visit_integer(i),
         Value::Float(f) => v.visit_float(f),
@@ -222,14 +174,10 @@ where
     }
 }
 
-macro_rules! empty_visit {
-    ($name: ident, $t: ty) => {
-        fn $name<'doc, V>(_v: &mut V, _node: &'doc $t)
-        where
-            V: Visit<'doc> + ?Sized,
-        {
-        }
-    };
+macro_rules! empty_visit
+{
+    ($name: ident, $t: ty)
+    => { fn $name<'doc, V>(_v: & mut V, _node: & 'doc $t) where V: Visit < 'doc > + ? Sized, {} };
 }
 
 empty_visit!(visit_boolean, Formatted<bool>);

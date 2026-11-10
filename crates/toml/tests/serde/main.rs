@@ -1,13 +1,10 @@
 #![recursion_limit = "256"]
 #![cfg(all(feature = "parse", feature = "display", feature = "serde"))]
 
-macro_rules! t {
-    ($e:expr) => {
-        match $e {
-            Ok(t) => t,
-            Err(e) => panic!("{} failed with {}", stringify!($e), e),
-        }
-    };
+macro_rules! t
+{
+    ($e: expr)
+    => { match $e { Ok(t) => t, Err(e) => panic ! ("{} failed with {}", stringify ! ($e), e), } };
 }
 
 mod de_enum;
@@ -33,19 +30,17 @@ use toml::Table as SerdeDocument;
 use toml::Table as SerdeTable;
 use toml::Value as SerdeValue;
 
-fn value_from_str<T>(s: &'_ str) -> Result<T, toml::de::Error>
+fn value_from_str<T>(s: & '_ str) -> Result<T, toml::de::Error>
 where
-    T: serde::de::DeserializeOwned,
-{
-    T::deserialize(toml::de::ValueDeserializer::parse(s)?)
-}
+T: serde::de::DeserializeOwned,
+{ T::deserialize(toml::de::ValueDeserializer::parse(s)?) }
 
-fn to_string_value<T>(value: &T) -> Result<String, toml::ser::Error>
+fn to_string_value<T>(value: & T) -> Result<String, toml::ser::Error>
 where
-    T: serde::ser::Serialize + ?Sized,
+T: serde::ser::Serialize + ? Sized,
 {
-    let mut output = String::new();
-    let serializer = toml::ser::ValueSerializer::new(&mut output);
+    let mut output = String:: new ();
+    let serializer = toml::ser::ValueSerializer:: new ( & mut output);
     value.serialize(serializer)?;
     Ok(output)
 }

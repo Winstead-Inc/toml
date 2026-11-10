@@ -24,9 +24,10 @@ extern crate alloc;
 
 mod spanned;
 pub use crate::spanned::Spanned;
+
 #[cfg(feature = "serde")]
 pub mod de;
 
-#[doc = include_str!("../README.md")]
+#[doc = include_str ! ("../README.md")]
 #[cfg(doctest)]
 pub struct ReadmeDoctests;

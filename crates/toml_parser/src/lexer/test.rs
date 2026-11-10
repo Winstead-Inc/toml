@@ -1,650 +1,811 @@
-use super::*;
+use super:: * ;
 
 use snapbox::assert_data_eq;
-use snapbox::prelude::*;
+use snapbox::prelude:: * ;
 use snapbox::str;
 
 #[test]
-fn test_lex_ascii_char() {
-    let cases = [(
+fn test_lex_ascii_char()
+{
+    let cases =
+    [(
         ".trailing",
-        str![[r#"
+        str!
+        [[
+            r#"
 Token {
     kind: Dot,
     span: 0..1,
 }
 
-"#]]
+"#
+        ]]
         .raw(),
         str!["trailing"].raw(),
     )];
-    for (stream, expected_tokens, expected_stream) in cases {
+    for (stream, expected_tokens, expected_stream) in cases
+    {
         dbg!(stream);
-        let mut stream = Stream::new(stream);
-        let actual_tokens = lex_ascii_char(&mut stream, TokenKind::Dot);
+        let mut stream = Stream:: new (stream);
+        let actual_tokens = lex_ascii_char( & mut stream, TokenKind::Dot);
         assert_data_eq!(actual_tokens.to_debug(), expected_tokens.raw());
-        let stream = *stream;
+        let stream = * stream;
         assert_data_eq!(stream, expected_stream.raw());
     }
 }
 
 #[test]
-fn test_lex_whitespace() {
-    let cases = [
+fn test_lex_whitespace()
+{
+    let cases =
+    [
         (
             " ",
-            str![[r#"
+            str!
+            [[
+                r#"
 Token {
     kind: Whitespace,
     span: 0..1,
 }
 
-"#]]
+"#
+            ]]
             .raw(),
             str![].raw(),
         ),
         (
             " \t  \t  \t ",
-            str![[r#"
+            str!
+            [[
+                r#"
 Token {
     kind: Whitespace,
     span: 0..9,
 }
 
-"#]]
+"#
+            ]]
             .raw(),
             str![].raw(),
         ),
         (
             " \n",
-            str![[r#"
+            str!
+            [[
+                r#"
 Token {
     kind: Whitespace,
     span: 0..1,
 }
 
-"#]]
+"#
+            ]]
             .raw(),
-            str![[r#"
+            str!
+            [[
+                r#"
 
 
-"#]]
+"#
+            ]]
             .raw(),
         ),
         (
             " #",
-            str![[r#"
+            str!
+            [[
+                r#"
 Token {
     kind: Whitespace,
     span: 0..1,
 }
 
-"#]]
+"#
+            ]]
             .raw(),
             str!["#"].raw(),
         ),
         (
             " a",
-            str![[r#"
+            str!
+            [[
+                r#"
 Token {
     kind: Whitespace,
     span: 0..1,
 }
 
-"#]]
+"#
+            ]]
             .raw(),
             str!["a"].raw(),
         ),
     ];
-    for (stream, expected_tokens, expected_stream) in cases {
+    for (stream, expected_tokens, expected_stream) in cases
+    {
         dbg!(stream);
-        let mut stream = Stream::new(stream);
-        let actual_tokens = lex_whitespace(&mut stream);
+        let mut stream = Stream:: new (stream);
+        let actual_tokens = lex_whitespace( & mut stream);
         assert_data_eq!(actual_tokens.to_debug(), expected_tokens.raw());
-        let stream = *stream;
+        let stream = * stream;
         assert_data_eq!(stream, expected_stream.raw());
     }
 }
 
 #[test]
-fn test_lex_comment() {
-    let cases = [
+fn test_lex_comment()
+{
+    let cases =
+    [
         (
             "#",
-            str![[r#"
+            str!
+            [[
+                r#"
 Token {
     kind: Comment,
     span: 0..1,
 }
 
-"#]]
+"#
+            ]]
             .raw(),
             str![""].raw(),
         ),
         (
             "# content",
-            str![[r#"
+            str!
+            [[
+                r#"
 Token {
     kind: Comment,
     span: 0..9,
 }
 
-"#]]
+"#
+            ]]
             .raw(),
             str![""].raw(),
         ),
         (
             "# content \ntrailing",
-            str![[r#"
+            str!
+            [[
+                r#"
 Token {
     kind: Comment,
     span: 0..10,
 }
 
-"#]]
+"#
+            ]]
             .raw(),
-            str![[r#"
+            str!
+            [[
+                r#"
 
 trailing
-"#]]
+"#
+            ]]
             .raw(),
         ),
         (
             "# content \r\ntrailing",
-            str![[r#"
+            str!
+            [[
+                r#"
 Token {
     kind: Comment,
     span: 0..10,
 }
 
-"#]]
+"#
+            ]]
             .raw(),
-            str![[r#"
+            str!
+            [[
+                r#"
 
 trailing
-"#]]
+"#
+            ]]
             .raw(),
         ),
         (
             "# content \0continue",
-            str![[r#"
+            str!
+            [[
+                r#"
 Token {
     kind: Comment,
     span: 0..19,
 }
 
-"#]]
+"#
+            ]]
             .raw(),
             str![""].raw(),
         ),
     ];
-    for (stream, expected_tokens, expected_stream) in cases {
+    for (stream, expected_tokens, expected_stream) in cases
+    {
         dbg!(stream);
-        let mut stream = Stream::new(stream);
-        let actual_tokens = lex_comment(&mut stream);
+        let mut stream = Stream:: new (stream);
+        let actual_tokens = lex_comment( & mut stream);
         assert_data_eq!(actual_tokens.to_debug(), expected_tokens.raw());
-        let stream = *stream;
+        let stream = * stream;
         assert_data_eq!(stream, expected_stream.raw());
     }
 }
 
 #[test]
-fn test_lex_crlf() {
-    let cases = [
+fn test_lex_crlf()
+{
+    let cases =
+    [
         (
             "\r\ntrailing",
-            str![[r#"
+            str!
+            [[
+                r#"
 Token {
     kind: Newline,
     span: 0..2,
 }
 
-"#]]
+"#
+            ]]
             .raw(),
             str!["trailing"].raw(),
         ),
         (
             "\rtrailing",
-            str![[r#"
+            str!
+            [[
+                r#"
 Token {
     kind: Newline,
     span: 0..1,
 }
 
-"#]]
+"#
+            ]]
             .raw(),
             str!["trailing"].raw(),
         ),
     ];
-    for (stream, expected_tokens, expected_stream) in cases {
+    for (stream, expected_tokens, expected_stream) in cases
+    {
         dbg!(stream);
-        let mut stream = Stream::new(stream);
-        let actual_tokens = lex_crlf(&mut stream);
+        let mut stream = Stream:: new (stream);
+        let actual_tokens = lex_crlf( & mut stream);
         assert_data_eq!(actual_tokens.to_debug(), expected_tokens.raw());
-        let stream = *stream;
+        let stream = * stream;
         assert_data_eq!(stream, expected_stream.raw());
     }
 }
 
 #[test]
-fn test_lex_literal_string() {
-    let cases = [
+fn test_lex_literal_string()
+{
+    let cases =
+    [
         (
             "''",
-            str![[r#"
+            str!
+            [[
+                r#"
 Token {
     kind: LiteralString,
     span: 0..2,
 }
 
-"#]]
+"#
+            ]]
             .raw(),
             str![""].raw(),
         ),
         (
             "''trailing",
-            str![[r#"
+            str!
+            [[
+                r#"
 Token {
     kind: LiteralString,
     span: 0..2,
 }
 
-"#]]
+"#
+            ]]
             .raw(),
             str!["trailing"].raw(),
         ),
         (
             "'content'trailing",
-            str![[r#"
+            str!
+            [[
+                r#"
 Token {
     kind: LiteralString,
     span: 0..9,
 }
 
-"#]]
+"#
+            ]]
             .raw(),
             str!["trailing"].raw(),
         ),
         (
             "'content",
-            str![[r#"
+            str!
+            [[
+                r#"
 Token {
     kind: LiteralString,
     span: 0..8,
 }
 
-"#]]
+"#
+            ]]
             .raw(),
             str![""].raw(),
         ),
         (
             "'content\ntrailing",
-            str![[r#"
+            str!
+            [[
+                r#"
 Token {
     kind: LiteralString,
     span: 0..8,
 }
 
-"#]]
+"#
+            ]]
             .raw(),
-            str![[r#"
+            str!
+            [[
+                r#"
 
 trailing
-"#]]
+"#
+            ]]
             .raw(),
         ),
     ];
-    for (stream, expected_tokens, expected_stream) in cases {
+    for (stream, expected_tokens, expected_stream) in cases
+    {
         dbg!(stream);
-        let mut stream = Stream::new(stream);
-        let actual_tokens = lex_literal_string(&mut stream);
+        let mut stream = Stream:: new (stream);
+        let actual_tokens = lex_literal_string( & mut stream);
         assert_data_eq!(actual_tokens.to_debug(), expected_tokens.raw());
-        let stream = *stream;
+        let stream = * stream;
         assert_data_eq!(stream, expected_stream.raw());
     }
 }
 
 #[test]
-fn test_lex_ml_literal_string() {
-    let cases = [
+fn test_lex_ml_literal_string()
+{
+    let cases =
+    [
         (
             "''''''",
-            str![[r#"
+            str!
+            [[
+                r#"
 Token {
     kind: MlLiteralString,
     span: 0..6,
 }
 
-"#]]
+"#
+            ]]
             .raw(),
             str![""].raw(),
         ),
         (
             "''''''trailing",
-            str![[r#"
+            str!
+            [[
+                r#"
 Token {
     kind: MlLiteralString,
     span: 0..6,
 }
 
-"#]]
+"#
+            ]]
             .raw(),
             str!["trailing"].raw(),
         ),
         (
             "'''content'''trailing",
-            str![[r#"
+            str!
+            [[
+                r#"
 Token {
     kind: MlLiteralString,
     span: 0..13,
 }
 
-"#]]
+"#
+            ]]
             .raw(),
             str!["trailing"].raw(),
         ),
         (
             "'''content",
-            str![[r#"
+            str!
+            [[
+                r#"
 Token {
     kind: MlLiteralString,
     span: 0..10,
 }
 
-"#]]
+"#
+            ]]
             .raw(),
             str![""].raw(),
         ),
         (
             "'''content'",
-            str![[r#"
+            str!
+            [[
+                r#"
 Token {
     kind: MlLiteralString,
     span: 0..11,
 }
 
-"#]]
+"#
+            ]]
             .raw(),
             str![""].raw(),
         ),
         (
             "'''content''",
-            str![[r#"
+            str!
+            [[
+                r#"
 Token {
     kind: MlLiteralString,
     span: 0..12,
 }
 
-"#]]
+"#
+            ]]
             .raw(),
             str![""].raw(),
         ),
         (
             "'''content\ntrailing",
-            str![[r#"
+            str!
+            [[
+                r#"
 Token {
     kind: MlLiteralString,
     span: 0..19,
 }
 
-"#]]
+"#
+            ]]
             .raw(),
             str![""].raw(),
         ),
         (
             "'''''''trailing",
-            str![[r#"
+            str!
+            [[
+                r#"
 Token {
     kind: MlLiteralString,
     span: 0..7,
 }
 
-"#]]
+"#
+            ]]
             .raw(),
             str!["trailing"].raw(),
         ),
         (
             "''''''''trailing",
-            str![[r#"
+            str!
+            [[
+                r#"
 Token {
     kind: MlLiteralString,
     span: 0..8,
 }
 
-"#]]
+"#
+            ]]
             .raw(),
             str!["trailing"].raw(),
         ),
         (
             "'''''''''trailing",
-            str![[r#"
+            str!
+            [[
+                r#"
 Token {
     kind: MlLiteralString,
     span: 0..8,
 }
 
-"#]]
+"#
+            ]]
             .raw(),
             str!["'trailing"].raw(),
         ),
         (
             "'''''content''''trailing",
-            str![[r#"
+            str!
+            [[
+                r#"
 Token {
     kind: MlLiteralString,
     span: 0..16,
 }
 
-"#]]
+"#
+            ]]
             .raw(),
             str!["trailing"].raw(),
         ),
         (
             "'''''content'''''trailing",
-            str![[r#"
+            str!
+            [[
+                r#"
 Token {
     kind: MlLiteralString,
     span: 0..17,
 }
 
-"#]]
+"#
+            ]]
             .raw(),
             str!["trailing"].raw(),
         ),
         (
             "'''''content''''''trailing",
-            str![[r#"
+            str!
+            [[
+                r#"
 Token {
     kind: MlLiteralString,
     span: 0..17,
 }
 
-"#]]
+"#
+            ]]
             .raw(),
             str!["'trailing"].raw(),
         ),
     ];
-    for (stream, expected_tokens, expected_stream) in cases {
+    for (stream, expected_tokens, expected_stream) in cases
+    {
         dbg!(stream);
-        let mut stream = Stream::new(stream);
-        let actual_tokens = lex_ml_literal_string(&mut stream);
+        let mut stream = Stream:: new (stream);
+        let actual_tokens = lex_ml_literal_string( & mut stream);
         assert_data_eq!(actual_tokens.to_debug(), expected_tokens.raw());
-        let stream = *stream;
+        let stream = * stream;
         assert_data_eq!(stream, expected_stream.raw());
     }
 }
 
 #[test]
-fn test_lex_basic_string() {
-    let cases = [
+fn test_lex_basic_string()
+{
+    let cases =
+    [
         (
             r#""""#,
-            str![[r#"
+            str!
+            [[
+                r#"
 Token {
     kind: BasicString,
     span: 0..2,
 }
 
-"#]]
+"#
+            ]]
             .raw(),
             str![].raw(),
         ),
         (
             r#"""trailing"#,
-            str![[r#"
+            str!
+            [[
+                r#"
 Token {
     kind: BasicString,
     span: 0..2,
 }
 
-"#]]
+"#
+            ]]
             .raw(),
             str!["trailing"].raw(),
         ),
         (
             r#""content"trailing"#,
-            str![[r#"
+            str!
+            [[
+                r#"
 Token {
     kind: BasicString,
     span: 0..9,
 }
 
-"#]]
+"#
+            ]]
             .raw(),
             str!["trailing"].raw(),
         ),
         (
             r#""content"#,
-            str![[r#"
+            str!
+            [[
+                r#"
 Token {
     kind: BasicString,
     span: 0..8,
 }
 
-"#]]
+"#
+            ]]
             .raw(),
             str![].raw(),
         ),
         (
             r#""content\ntrailing"#,
-            str![[r#"
+            str!
+            [[
+                r#"
 Token {
     kind: BasicString,
     span: 0..18,
 }
 
-"#]]
+"#
+            ]]
             .raw(),
             str![].raw(),
         ),
     ];
-    for (stream, expected_tokens, expected_stream) in cases {
+    for (stream, expected_tokens, expected_stream) in cases
+    {
         dbg!(stream);
-        let mut stream = Stream::new(stream);
-        let actual_tokens = lex_basic_string(&mut stream);
+        let mut stream = Stream:: new (stream);
+        let actual_tokens = lex_basic_string( & mut stream);
         assert_data_eq!(actual_tokens.to_debug(), expected_tokens.raw());
-        let stream = *stream;
+        let stream = * stream;
         assert_data_eq!(stream, expected_stream.raw());
     }
 }
 
 #[test]
-fn test_lex_atom() {
-    let cases = [
+fn test_lex_atom()
+{
+    let cases =
+    [
         (
             "hello",
-            str![[r#"
+            str!
+            [[
+                r#"
 Token {
     kind: Atom,
     span: 0..5,
 }
 
-"#]]
+"#
+            ]]
             .raw(),
             str![""].raw(),
         ),
         (
             "hello = world",
-            str![[r#"
+            str!
+            [[
+                r#"
 Token {
     kind: Atom,
     span: 0..5,
 }
 
-"#]]
+"#
+            ]]
             .raw(),
             str![" = world"].raw(),
         ),
         (
             "1.100e100 ]",
-            str![[r#"
+            str!
+            [[
+                r#"
 Token {
     kind: Atom,
     span: 0..1,
 }
 
-"#]]
+"#
+            ]]
             .raw(),
             str![".100e100 ]"].raw(),
         ),
         (
             "a.b.c = 5",
-            str![[r#"
+            str!
+            [[
+                r#"
 Token {
     kind: Atom,
     span: 0..1,
 }
 
-"#]]
+"#
+            ]]
             .raw(),
             str![".b.c = 5"].raw(),
         ),
         (
             "true ]",
-            str![[r#"
+            str!
+            [[
+                r#"
 Token {
     kind: Atom,
     span: 0..4,
 }
 
-"#]]
+"#
+            ]]
             .raw(),
             str![" ]"].raw(),
         ),
     ];
-    for (stream, expected_tokens, expected_stream) in cases {
+    for (stream, expected_tokens, expected_stream) in cases
+    {
         dbg!(stream);
-        let mut stream = Stream::new(stream);
-        let actual_tokens = lex_atom(&mut stream);
+        let mut stream = Stream:: new (stream);
+        let actual_tokens = lex_atom( & mut stream);
         assert_data_eq!(actual_tokens.to_debug(), expected_tokens.raw());
-        let stream = *stream;
+        let stream = * stream;
         assert_data_eq!(stream, expected_stream.raw());
     }
 }
 
 #[track_caller]
-fn t(input: &str, expected: impl IntoData) {
-    let source = crate::Source::new(input);
+fn t(input: & str, expected: impl IntoData)
+{
+    let source = crate::Source:: new (input);
     let actual = source.lex().into_vec();
     assert_data_eq!(actual.to_debug(), expected);
 
-    if !actual.is_empty() {
-        let spans = actual.iter().map(|t| t.span()).collect::<Vec<_>>();
+    if ! actual.is_empty()
+    {
+        let spans = actual.iter().map( | t | t.span()).collect::<Vec<_>>();
         assert_eq!(spans.first().unwrap().start(), 0);
         assert_eq!(spans.last().unwrap().end(), input.len());
-        for i in 0..(spans.len() - 1) {
-            let current = &spans[i];
-            let next = &spans[i + 1];
-            assert_eq!(current.end(), next.start());
-        }
+        for i in 0..(spans.len() - 1) { let current = & spans[i]; let next = & spans[i + 1]; assert_eq ! (current.end(), next.start()); }
     }
 }
 
 #[test]
-fn literal_strings() {
-    t(
+fn literal_strings()
+{
+    t
+    (
         "''",
-        str![[r#"
+        str!
+        [[
+            r#"
 [
     Token {
         kind: LiteralString,
@@ -656,12 +817,16 @@ fn literal_strings() {
     },
 ]
 
-"#]]
+"#
+        ]]
         .raw(),
     );
-    t(
+    t
+    (
         "''''''",
-        str![[r#"
+        str!
+        [[
+            r#"
 [
     Token {
         kind: MlLiteralString,
@@ -673,12 +838,16 @@ fn literal_strings() {
     },
 ]
 
-"#]]
+"#
+        ]]
         .raw(),
     );
-    t(
+    t
+    (
         "'''\n'''",
-        str![[r#"
+        str!
+        [[
+            r#"
 [
     Token {
         kind: MlLiteralString,
@@ -690,12 +859,16 @@ fn literal_strings() {
     },
 ]
 
-"#]]
+"#
+        ]]
         .raw(),
     );
-    t(
+    t
+    (
         "'a'",
-        str![[r#"
+        str!
+        [[
+            r#"
 [
     Token {
         kind: LiteralString,
@@ -707,12 +880,16 @@ fn literal_strings() {
     },
 ]
 
-"#]]
+"#
+        ]]
         .raw(),
     );
-    t(
+    t
+    (
         "'\"a'",
-        str![[r#"
+        str!
+        [[
+            r#"
 [
     Token {
         kind: LiteralString,
@@ -724,12 +901,16 @@ fn literal_strings() {
     },
 ]
 
-"#]]
+"#
+        ]]
         .raw(),
     );
-    t(
+    t
+    (
         "''''a'''",
-        str![[r#"
+        str!
+        [[
+            r#"
 [
     Token {
         kind: MlLiteralString,
@@ -741,12 +922,16 @@ fn literal_strings() {
     },
 ]
 
-"#]]
+"#
+        ]]
         .raw(),
     );
-    t(
+    t
+    (
         "'''\n'a\n'''",
-        str![[r#"
+        str!
+        [[
+            r#"
 [
     Token {
         kind: MlLiteralString,
@@ -758,12 +943,16 @@ fn literal_strings() {
     },
 ]
 
-"#]]
+"#
+        ]]
         .raw(),
     );
-    t(
+    t
+    (
         "'''a\n'a\r\n'''",
-        str![[r#"
+        str!
+        [[
+            r#"
 [
     Token {
         kind: MlLiteralString,
@@ -775,16 +964,21 @@ fn literal_strings() {
     },
 ]
 
-"#]]
+"#
+        ]]
         .raw(),
     );
 }
 
 #[test]
-fn basic_strings() {
-    t(
+fn basic_strings()
+{
+    t
+    (
         r#""""#,
-        str![[r#"
+        str!
+        [[
+            r#"
 [
     Token {
         kind: BasicString,
@@ -796,12 +990,16 @@ fn basic_strings() {
     },
 ]
 
-"#]]
+"#
+        ]]
         .raw(),
     );
-    t(
+    t
+    (
         r#""""""""#,
-        str![[r#"
+        str!
+        [[
+            r#"
 [
     Token {
         kind: MlBasicString,
@@ -813,12 +1011,16 @@ fn basic_strings() {
     },
 ]
 
-"#]]
+"#
+        ]]
         .raw(),
     );
-    t(
+    t
+    (
         r#""a""#,
-        str![[r#"
+        str!
+        [[
+            r#"
 [
     Token {
         kind: BasicString,
@@ -830,12 +1032,16 @@ fn basic_strings() {
     },
 ]
 
-"#]]
+"#
+        ]]
         .raw(),
     );
-    t(
+    t
+    (
         r#""""a""""#,
-        str![[r#"
+        str!
+        [[
+            r#"
 [
     Token {
         kind: MlBasicString,
@@ -847,12 +1053,16 @@ fn basic_strings() {
     },
 ]
 
-"#]]
+"#
+        ]]
         .raw(),
     );
-    t(
+    t
+    (
         r#""\t""#,
-        str![[r#"
+        str!
+        [[
+            r#"
 [
     Token {
         kind: BasicString,
@@ -864,12 +1074,16 @@ fn basic_strings() {
     },
 ]
 
-"#]]
+"#
+        ]]
         .raw(),
     );
-    t(
+    t
+    (
         r#""\u0000""#,
-        str![[r#"
+        str!
+        [[
+            r#"
 [
     Token {
         kind: BasicString,
@@ -881,12 +1095,16 @@ fn basic_strings() {
     },
 ]
 
-"#]]
+"#
+        ]]
         .raw(),
     );
-    t(
+    t
+    (
         r#""\U00000000""#,
-        str![[r#"
+        str!
+        [[
+            r#"
 [
     Token {
         kind: BasicString,
@@ -898,12 +1116,16 @@ fn basic_strings() {
     },
 ]
 
-"#]]
+"#
+        ]]
         .raw(),
     );
-    t(
+    t
+    (
         r#""\U000A0000""#,
-        str![[r#"
+        str!
+        [[
+            r#"
 [
     Token {
         kind: BasicString,
@@ -915,12 +1137,16 @@ fn basic_strings() {
     },
 ]
 
-"#]]
+"#
+        ]]
         .raw(),
     );
-    t(
+    t
+    (
         r#""\\t""#,
-        str![[r#"
+        str!
+        [[
+            r#"
 [
     Token {
         kind: BasicString,
@@ -932,12 +1158,16 @@ fn basic_strings() {
     },
 ]
 
-"#]]
+"#
+        ]]
         .raw(),
     );
-    t(
+    t
+    (
         "\"\t\"",
-        str![[r#"
+        str!
+        [[
+            r#"
 [
     Token {
         kind: BasicString,
@@ -949,12 +1179,16 @@ fn basic_strings() {
     },
 ]
 
-"#]]
+"#
+        ]]
         .raw(),
     );
-    t(
+    t
+    (
         "\"\"\"\n\t\"\"\"",
-        str![[r#"
+        str!
+        [[
+            r#"
 [
     Token {
         kind: MlBasicString,
@@ -966,12 +1200,16 @@ fn basic_strings() {
     },
 ]
 
-"#]]
+"#
+        ]]
         .raw(),
     );
-    t(
+    t
+    (
         "\"\"\"\\\n\"\"\"",
-        str![[r#"
+        str!
+        [[
+            r#"
 [
     Token {
         kind: MlBasicString,
@@ -983,12 +1221,16 @@ fn basic_strings() {
     },
 ]
 
-"#]]
+"#
+        ]]
         .raw(),
     );
-    t(
+    t
+    (
         "\"\"\"\\\n     \t   \t  \\\r\n  \t \n  \t \r\n\"\"\"",
-        str![[r#"
+        str!
+        [[
+            r#"
 [
     Token {
         kind: MlBasicString,
@@ -1000,12 +1242,16 @@ fn basic_strings() {
     },
 ]
 
-"#]]
+"#
+        ]]
         .raw(),
     );
-    t(
+    t
+    (
         r#""\r""#,
-        str![[r#"
+        str!
+        [[
+            r#"
 [
     Token {
         kind: BasicString,
@@ -1017,12 +1263,16 @@ fn basic_strings() {
     },
 ]
 
-"#]]
+"#
+        ]]
         .raw(),
     );
-    t(
+    t
+    (
         r#""\n""#,
-        str![[r#"
+        str!
+        [[
+            r#"
 [
     Token {
         kind: BasicString,
@@ -1034,12 +1284,16 @@ fn basic_strings() {
     },
 ]
 
-"#]]
+"#
+        ]]
         .raw(),
     );
-    t(
+    t
+    (
         r#""\b""#,
-        str![[r#"
+        str!
+        [[
+            r#"
 [
     Token {
         kind: BasicString,
@@ -1051,12 +1305,16 @@ fn basic_strings() {
     },
 ]
 
-"#]]
+"#
+        ]]
         .raw(),
     );
-    t(
+    t
+    (
         r#""a\fa""#,
-        str![[r#"
+        str!
+        [[
+            r#"
 [
     Token {
         kind: BasicString,
@@ -1068,12 +1326,16 @@ fn basic_strings() {
     },
 ]
 
-"#]]
+"#
+        ]]
         .raw(),
     );
-    t(
+    t
+    (
         r#""\"a""#,
-        str![[r#"
+        str!
+        [[
+            r#"
 [
     Token {
         kind: BasicString,
@@ -1085,12 +1347,16 @@ fn basic_strings() {
     },
 ]
 
-"#]]
+"#
+        ]]
         .raw(),
     );
-    t(
+    t
+    (
         "\"\"\"\na\"\"\"",
-        str![[r#"
+        str!
+        [[
+            r#"
 [
     Token {
         kind: MlBasicString,
@@ -1102,12 +1368,16 @@ fn basic_strings() {
     },
 ]
 
-"#]]
+"#
+        ]]
         .raw(),
     );
-    t(
+    t
+    (
         "\"\"\"\n\"\"\"",
-        str![[r#"
+        str!
+        [[
+            r#"
 [
     Token {
         kind: MlBasicString,
@@ -1119,12 +1389,16 @@ fn basic_strings() {
     },
 ]
 
-"#]]
+"#
+        ]]
         .raw(),
     );
-    t(
+    t
+    (
         r#""""a\"""b""""#,
-        str![[r#"
+        str!
+        [[
+            r#"
 [
     Token {
         kind: MlBasicString,
@@ -1136,12 +1410,16 @@ fn basic_strings() {
     },
 ]
 
-"#]]
+"#
+        ]]
         .raw(),
     );
-    t(
+    t
+    (
         r#""\a"#,
-        str![[r#"
+        str!
+        [[
+            r#"
 [
     Token {
         kind: BasicString,
@@ -1153,12 +1431,16 @@ fn basic_strings() {
     },
 ]
 
-"#]]
+"#
+        ]]
         .raw(),
     );
-    t(
+    t
+    (
         "\"\\\n",
-        str![[r#"
+        str!
+        [[
+            r#"
 [
     Token {
         kind: BasicString,
@@ -1174,12 +1456,16 @@ fn basic_strings() {
     },
 ]
 
-"#]]
+"#
+        ]]
         .raw(),
     );
-    t(
+    t
+    (
         "\"\\\r\n",
-        str![[r#"
+        str!
+        [[
+            r#"
 [
     Token {
         kind: BasicString,
@@ -1195,12 +1481,16 @@ fn basic_strings() {
     },
 ]
 
-"#]]
+"#
+        ]]
         .raw(),
     );
-    t(
+    t
+    (
         "\"\\",
-        str![[r#"
+        str!
+        [[
+            r#"
 [
     Token {
         kind: BasicString,
@@ -1212,12 +1502,16 @@ fn basic_strings() {
     },
 ]
 
-"#]]
+"#
+        ]]
         .raw(),
     );
-    t(
+    t
+    (
         "\"\u{0}",
-        str![[r#"
+        str!
+        [[
+            r#"
 [
     Token {
         kind: BasicString,
@@ -1229,12 +1523,16 @@ fn basic_strings() {
     },
 ]
 
-"#]]
+"#
+        ]]
         .raw(),
     );
-    t(
+    t
+    (
         r#""\U00""#,
-        str![[r#"
+        str!
+        [[
+            r#"
 [
     Token {
         kind: BasicString,
@@ -1246,12 +1544,16 @@ fn basic_strings() {
     },
 ]
 
-"#]]
+"#
+        ]]
         .raw(),
     );
-    t(
+    t
+    (
         r#""\U00"#,
-        str![[r#"
+        str!
+        [[
+            r#"
 [
     Token {
         kind: BasicString,
@@ -1263,12 +1565,16 @@ fn basic_strings() {
     },
 ]
 
-"#]]
+"#
+        ]]
         .raw(),
     );
-    t(
+    t
+    (
         r#""\uD800"#,
-        str![[r#"
+        str!
+        [[
+            r#"
 [
     Token {
         kind: BasicString,
@@ -1280,12 +1586,16 @@ fn basic_strings() {
     },
 ]
 
-"#]]
+"#
+        ]]
         .raw(),
     );
-    t(
+    t
+    (
         r#""\UFFFFFFFF"#,
-        str![[r#"
+        str!
+        [[
+            r#"
 [
     Token {
         kind: BasicString,
@@ -1297,16 +1607,21 @@ fn basic_strings() {
     },
 ]
 
-"#]]
+"#
+        ]]
         .raw(),
     );
 }
 
 #[test]
-fn keylike() {
-    t(
+fn keylike()
+{
+    t
+    (
         "foo",
-        str![[r#"
+        str!
+        [[
+            r#"
 [
     Token {
         kind: Atom,
@@ -1318,12 +1633,16 @@ fn keylike() {
     },
 ]
 
-"#]]
+"#
+        ]]
         .raw(),
     );
-    t(
+    t
+    (
         "0bar",
-        str![[r#"
+        str!
+        [[
+            r#"
 [
     Token {
         kind: Atom,
@@ -1335,12 +1654,16 @@ fn keylike() {
     },
 ]
 
-"#]]
+"#
+        ]]
         .raw(),
     );
-    t(
+    t
+    (
         "bar0",
-        str![[r#"
+        str!
+        [[
+            r#"
 [
     Token {
         kind: Atom,
@@ -1352,12 +1675,16 @@ fn keylike() {
     },
 ]
 
-"#]]
+"#
+        ]]
         .raw(),
     );
-    t(
+    t
+    (
         "1234",
-        str![[r#"
+        str!
+        [[
+            r#"
 [
     Token {
         kind: Atom,
@@ -1369,12 +1696,16 @@ fn keylike() {
     },
 ]
 
-"#]]
+"#
+        ]]
         .raw(),
     );
-    t(
+    t
+    (
         "a-b",
-        str![[r#"
+        str!
+        [[
+            r#"
 [
     Token {
         kind: Atom,
@@ -1386,12 +1717,16 @@ fn keylike() {
     },
 ]
 
-"#]]
+"#
+        ]]
         .raw(),
     );
-    t(
+    t
+    (
         "a_B",
-        str![[r#"
+        str!
+        [[
+            r#"
 [
     Token {
         kind: Atom,
@@ -1403,12 +1738,16 @@ fn keylike() {
     },
 ]
 
-"#]]
+"#
+        ]]
         .raw(),
     );
-    t(
+    t
+    (
         "-_-",
-        str![[r#"
+        str!
+        [[
+            r#"
 [
     Token {
         kind: Atom,
@@ -1420,12 +1759,16 @@ fn keylike() {
     },
 ]
 
-"#]]
+"#
+        ]]
         .raw(),
     );
-    t(
+    t
+    (
         "___",
-        str![[r#"
+        str!
+        [[
+            r#"
 [
     Token {
         kind: Atom,
@@ -1437,16 +1780,21 @@ fn keylike() {
     },
 ]
 
-"#]]
+"#
+        ]]
         .raw(),
     );
 }
 
 #[test]
-fn all() {
-    t(
+fn all()
+{
+    t
+    (
         " a ",
-        str![[r#"
+        str!
+        [[
+            r#"
 [
     Token {
         kind: Whitespace,
@@ -1466,13 +1814,17 @@ fn all() {
     },
 ]
 
-"#]]
+"#
+        ]]
         .raw(),
     );
 
-    t(
+    t
+    (
         " a\t [[]] \t [] {} , . =\n# foo \r\n#foo \n ",
-        str![[r#"
+        str!
+        [[
+            r#"
 [
     Token {
         kind: Whitespace,
@@ -1580,16 +1932,21 @@ fn all() {
     },
 ]
 
-"#]]
+"#
+        ]]
         .raw(),
     );
 }
 
 #[test]
-fn bare_cr_bad() {
-    t(
+fn bare_cr_bad()
+{
+    t
+    (
         "\r",
-        str![[r#"
+        str!
+        [[
+            r#"
 [
     Token {
         kind: Newline,
@@ -1601,12 +1958,16 @@ fn bare_cr_bad() {
     },
 ]
 
-"#]]
+"#
+        ]]
         .raw(),
     );
-    t(
+    t
+    (
         "'\n",
-        str![[r#"
+        str!
+        [[
+            r#"
 [
     Token {
         kind: LiteralString,
@@ -1622,12 +1983,16 @@ fn bare_cr_bad() {
     },
 ]
 
-"#]]
+"#
+        ]]
         .raw(),
     );
-    t(
+    t
+    (
         "'\u{0}",
-        str![[r#"
+        str!
+        [[
+            r#"
 [
     Token {
         kind: LiteralString,
@@ -1639,12 +2004,16 @@ fn bare_cr_bad() {
     },
 ]
 
-"#]]
+"#
+        ]]
         .raw(),
     );
-    t(
+    t
+    (
         "'",
-        str![[r#"
+        str!
+        [[
+            r#"
 [
     Token {
         kind: LiteralString,
@@ -1656,12 +2025,16 @@ fn bare_cr_bad() {
     },
 ]
 
-"#]]
+"#
+        ]]
         .raw(),
     );
-    t(
+    t
+    (
         "\u{0}",
-        str![[r#"
+        str!
+        [[
+            r#"
 [
     Token {
         kind: Atom,
@@ -1673,16 +2046,21 @@ fn bare_cr_bad() {
     },
 ]
 
-"#]]
+"#
+        ]]
         .raw(),
     );
 }
 
 #[test]
-fn bad_comment() {
-    t(
+fn bad_comment()
+{
+    t
+    (
         "#\u{0}",
-        str![[r#"
+        str!
+        [[
+            r#"
 [
     Token {
         kind: Comment,
@@ -1694,7 +2072,8 @@ fn bad_comment() {
     },
 ]
 
-"#]]
+"#
+        ]]
         .raw(),
     );
 }

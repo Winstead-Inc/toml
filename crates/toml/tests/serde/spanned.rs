@@ -5,250 +5,295 @@ use std::collections::BTreeMap;
 use std::fmt::Debug;
 
 use serde::Deserialize;
-use serde::de::{Deserializer, MapAccess};
+use serde::de:: { Deserializer, MapAccess };
 use serde_untagged::UntaggedEnumVisitor;
 use snapbox::assert_data_eq;
-use snapbox::prelude::*;
+use snapbox::prelude:: * ;
 use snapbox::str;
 
 use crate::Datetime;
 use crate::Spanned;
 
 #[test]
-fn test_spanned_field() {
-    #[derive(Deserialize, Debug)]
-    struct Foo<T> {
-        foo: Spanned<T>,
-    }
+fn test_spanned_field()
+{
+   #[derive(Deserialize, Debug)]
+    struct Foo<T> { foo: Spanned<T>, }
 
-    #[derive(Deserialize, Debug)]
-    struct BareFoo<T> {
-        foo: T,
-    }
+   #[derive(Deserialize, Debug)]
+    struct BareFoo<T> { foo: T, }
 
-    #[track_caller]
-    fn good<T>(input: &str, expected: impl IntoData, span: impl IntoData)
+   #[track_caller]
+    fn good<T>(input: & str, expected: impl IntoData, span: impl IntoData)
     where
-        T: serde::de::DeserializeOwned + Debug + PartialEq,
+    T: serde::de::DeserializeOwned + Debug + PartialEq,
     {
         dbg!(input);
-        let foo: Foo<T> = crate::from_str(input).unwrap();
-        dbg!(&foo);
+        let foo: Foo < T > = crate::from_str(input).unwrap();
+        dbg!( & foo);
 
-        assert_data_eq!(&input[foo.foo.span()], expected,);
+        assert_data_eq!( & input[foo.foo.span()], expected,);
         assert_data_eq!(foo.foo.span().to_debug(), span);
 
         // Test for Spanned<> at the top level
-        let foo_outer: Spanned<BareFoo<T>> = crate::from_str(input).unwrap();
-        dbg!(&foo_outer);
+        let foo_outer: Spanned < BareFoo<T> > = crate::from_str(input).unwrap();
+        dbg!( & foo_outer);
 
-        assert_eq!(&foo_outer.get_ref().foo, foo.foo.get_ref());
+        assert_eq!( & foo_outer.get_ref().foo, foo.foo.get_ref());
         assert_eq!(foo_outer.span(), 0..0);
     }
 
-    good::<String>(
+    good::<String>
+    (
         "foo = \"foo\"",
         str![[r#""foo""#]],
-        str![[r#"
+        str!
+        [[
+            r#"
 6..11
 
-"#]],
+"#
+        ]],
     );
-    good::<u32>(
+    good::<u32>
+    (
         "foo = 42",
         str!["42"],
-        str![[r#"
+        str!
+        [[
+            r#"
 6..8
 
-"#]],
+"#
+        ]],
     );
     // leading plus
-    good::<u32>(
+    good::<u32>
+    (
         "foo = +42",
         str!["+42"],
-        str![[r#"
+        str!
+        [[
+            r#"
 6..9
 
-"#]],
+"#
+        ]],
     );
     // table
-    good::<BTreeMap<String, u32>>(
+    good::<BTreeMap<String, u32>>
+    (
         "foo = {\"foo\" = 42, \"bar\" = 42}",
         str![[r#"{"foo" = 42, "bar" = 42}"#]],
-        str![[r#"
+        str!
+        [[
+            r#"
 6..30
 
-"#]],
+"#
+        ]],
     );
     // array
-    good::<Vec<u32>>(
+    good::<Vec<u32>>
+    (
         "foo = [0, 1, 2, 3, 4]",
         str!["[0, 1, 2, 3, 4]"],
-        str![[r#"
+        str!
+        [[
+            r#"
 6..21
 
-"#]],
+"#
+        ]],
     );
     // datetime
-    good::<String>(
+    good::<String>
+    (
         "foo = \"1997-09-09T09:09:09Z\"",
         str![[r#""1997-09-09T09:09:09Z""#]],
-        str![[r#"
+        str!
+        [[
+            r#"
 6..28
 
-"#]],
+"#
+        ]],
     );
 
-    let good_datetimes = [
+    let good_datetimes =
+    [
         (
             "1997-09-09T09:09:09Z",
             str!["1997-09-09T09:09:09Z"],
-            str![[r#"
+            str!
+            [[
+                r#"
 6..26
 
-"#]],
+"#
+            ]],
         ),
         (
             "1997-09-09T09:09:09+09:09",
             str!["1997-09-09T09:09:09+09:09"],
-            str![[r#"
+            str!
+            [[
+                r#"
 6..31
 
-"#]],
+"#
+            ]],
         ),
         (
             "1997-09-09T09:09:09-09:09",
             str!["1997-09-09T09:09:09-09:09"],
-            str![[r#"
+            str!
+            [[
+                r#"
 6..31
 
-"#]],
+"#
+            ]],
         ),
         (
             "1997-09-09T09:09:09",
             str!["1997-09-09T09:09:09"],
-            str![[r#"
+            str!
+            [[
+                r#"
 6..25
 
-"#]],
+"#
+            ]],
         ),
         (
             "1997-09-09",
             str!["1997-09-09"],
-            str![[r#"
+            str!
+            [[
+                r#"
 6..16
 
-"#]],
+"#
+            ]],
         ),
         (
             "09:09:09",
             str!["09:09:09"],
-            str![[r#"
+            str!
+            [[
+                r#"
 6..14
 
-"#]],
+"#
+            ]],
         ),
         (
             "1997-09-09T09:09:09.09Z",
             str!["1997-09-09T09:09:09.09Z"],
-            str![[r#"
+            str!
+            [[
+                r#"
 6..29
 
-"#]],
+"#
+            ]],
         ),
         (
             "1997-09-09T09:09:09.09+09:09",
             str!["1997-09-09T09:09:09.09+09:09"],
-            str![[r#"
+            str!
+            [[
+                r#"
 6..34
 
-"#]],
+"#
+            ]],
         ),
         (
             "1997-09-09T09:09:09.09-09:09",
             str!["1997-09-09T09:09:09.09-09:09"],
-            str![[r#"
+            str!
+            [[
+                r#"
 6..34
 
-"#]],
+"#
+            ]],
         ),
         (
             "1997-09-09T09:09:09.09",
             str!["1997-09-09T09:09:09.09"],
-            str![[r#"
+            str!
+            [[
+                r#"
 6..28
 
-"#]],
+"#
+            ]],
         ),
         (
             "09:09:09.09",
             str!["09:09:09.09"],
-            str![[r#"
+            str!
+            [[
+                r#"
 6..17
 
-"#]],
+"#
+            ]],
         ),
     ];
-    for (value, expected, span) in good_datetimes {
-        let input = format!("foo = {value}");
-        good::<Datetime>(&input, expected, span);
-    }
+    for (value, expected, span) in good_datetimes { let input = format ! ("foo = {value}"); good::<Datetime>( & input, expected, span); }
     // ending at something other than the absolute end
-    good::<u32>(
+    good::<u32>
+    (
         "foo = 42\nnoise = true",
         str!["42"],
-        str![[r#"
+        str!
+        [[
+            r#"
 6..8
 
-"#]],
+"#
+        ]],
     );
 }
 
 #[test]
-fn test_inner_spanned_table() {
-    #[derive(Deserialize, Debug)]
-    struct Foo {
-        foo: Spanned<BTreeMap<Spanned<String>, Spanned<String>>>,
-    }
+fn test_inner_spanned_table()
+{
+   #[derive(Deserialize, Debug)]
+    struct Foo { foo: Spanned<BTreeMap<Spanned<String>, Spanned<String>>>, }
 
-    #[track_caller]
-    fn good(input: &str, zero: bool) {
+   #[track_caller]
+    fn good(input: & str, zero: bool)
+    {
         dbg!(input);
         let foo: Foo = crate::from_str(input).unwrap();
-        dbg!(&foo);
+        dbg!( & foo);
 
-        if zero {
+        if zero
+        {
             assert_eq!(foo.foo.span().start, 0, "invalid `foo.foo.span().start`");
             assert_eq!(foo.foo.span().end, 5, "invalid `foo.foo.span().end`");
-        } else {
-            assert_eq!(
-                foo.foo.span().start,
-                input.find('{').unwrap(),
-                "invalid `foo.foo.span().start`"
-            );
-            assert_eq!(
-                foo.foo.span().end,
-                input.find('}').unwrap() + 1,
-                "invalid `foo.foo.span().end`"
-            );
         }
-        for (k, v) in foo.foo.as_ref().iter() {
-            dbg!(&k);
-            dbg!(&v);
-            assert_eq!(
-                &input[k.span().start..k.span().end],
-                k.as_ref(),
-                "invalid key"
-            );
-            assert_eq!(
-                &input[(v.span().start + 1)..(v.span().end - 1)],
-                v.as_ref(),
-                "invalid value"
-            );
+        else
+        {
+            assert_eq!(foo.foo.span().start, input.find('{').unwrap(),"invalid `foo.foo.span().start`");
+            assert_eq!(foo.foo.span().end, input.find('}').unwrap() + 1, "invalid `foo.foo.span().end`");
+        }
+        for (k, v) in foo.foo.as_ref().iter()
+        {
+            dbg!( & k);
+            dbg!( & v);
+            assert_eq!( & input[k.span().start..k.span().end], k.as_ref(),"invalid key");
+            assert_eq!( & input[(v.span().start + 1)..(v.span().end - 1)], v.as_ref(),"invalid value");
         }
     }
 
-    good(
+    good
+    (
         "\
         [foo]
         a = 'b'
@@ -259,7 +304,8 @@ fn test_inner_spanned_table() {
         true,
     );
 
-    good(
+    good
+    (
         "
         foo = { a = 'b', bar = 'baz', c = 'd', e = \"f\" }",
         false,
@@ -267,30 +313,34 @@ fn test_inner_spanned_table() {
 }
 
 #[test]
-fn test_outer_spanned_table() {
-    #[derive(Debug, Deserialize)]
-    struct Foo {
-        foo: BTreeMap<Spanned<String>, Spanned<String>>,
-    }
+fn test_outer_spanned_table()
+{
+   #[derive(Debug, Deserialize)]
+    struct Foo { foo: BTreeMap<Spanned<String>, Spanned<String>>, }
 
-    fn good(s: &str, foo: &Foo) {
-        for (k, v) in foo.foo.iter() {
-            assert_eq!(&s[k.span().start..k.span().end], k.as_ref());
-            assert_eq!(&s[(v.span().start + 1)..(v.span().end - 1)], v.as_ref());
+    fn good(s: & str, foo: & Foo)
+    {
+        for (k, v) in foo.foo.iter()
+        {
+            assert_eq!( & s[k.span().start..k.span().end], k.as_ref());
+            assert_eq!( & s[(v.span().start + 1)..(v.span().end - 1)], v.as_ref());
         }
     }
 
     let input = "
-        [foo]
-        a = 'b'
-        bar = 'baz'
-        c = 'd'
-        e = \"f\"
-    ";
+                    [foo]
+                    a = 'b'
+                    bar = 'baz'
+                    c = 'd'
+                    e = \"f\"
+                ";
     let foo: Foo = crate::from_str(input).unwrap();
-    assert_data_eq!(
+    assert_data_eq!
+    (
         foo.to_debug(),
-        str![[r#"
+        str!
+        [[
+            r#"
 Foo {
     foo: {
         Spanned {
@@ -324,17 +374,21 @@ Foo {
     },
 }
 
-"#]]
+"#
+        ]]
     );
-    good(input, &foo);
+    good(input, & foo);
 
     let input = "
-        foo = { a = 'b', bar = 'baz', c = 'd', e = \"f\" }
-    ";
+                    foo = { a = 'b', bar = 'baz', c = 'd', e = \"f\" }
+                ";
     let foo: Foo = crate::from_str(input).unwrap();
-    assert_data_eq!(
+    assert_data_eq!
+    (
         foo.to_debug(),
-        str![[r#"
+        str!
+        [[
+            r#"
 Foo {
     foo: {
         Spanned {
@@ -368,43 +422,46 @@ Foo {
     },
 }
 
-"#]]
+"#
+        ]]
     );
-    good(input, &foo);
+    good(input, & foo);
 }
 
 #[test]
-fn test_spanned_nested() {
-    #[derive(Debug, Deserialize)]
-    struct Foo {
-        foo: BTreeMap<Spanned<String>, BTreeMap<Spanned<String>, Spanned<String>>>,
-    }
+fn test_spanned_nested()
+{
+   #[derive(Debug, Deserialize)]
+    struct Foo { foo: BTreeMap<Spanned<String>, BTreeMap<Spanned<String>, Spanned<String>>>, }
 
-    fn good(s: &str, foo: &Foo) {
-        for (k, v) in foo.foo.iter() {
-            assert_eq!(&s[k.span().start..k.span().end], k.as_ref());
-            for (n_k, n_v) in v.iter() {
-                assert_eq!(&s[n_k.span().start..n_k.span().end], n_k.as_ref());
-                assert_eq!(
-                    &s[(n_v.span().start + 1)..(n_v.span().end - 1)],
-                    n_v.as_ref()
-                );
+    fn good(s: & str, foo: & Foo)
+    {
+        for (k, v) in foo.foo.iter()
+        {
+            assert_eq!( & s[k.span().start..k.span().end], k.as_ref());
+            for (n_k, n_v) in v.iter()
+            {
+                assert_eq!( & s[n_k.span().start..n_k.span().end], n_k.as_ref());
+                assert_eq!( & s[(n_v.span().start + 1)..(n_v.span().end - 1)], n_v.as_ref());
             }
         }
     }
 
     let input = "
-        [foo.a]
-        a = 'b'
-        c = 'd'
-        e = \"f\"
-        [foo.bar]
-        baz = 'true'
-    ";
+                    [foo.a]
+                    a = 'b'
+                    c = 'd'
+                    e = \"f\"
+                    [foo.bar]
+                    baz = 'true'
+                ";
     let foo: Foo = crate::from_str(input).unwrap();
-    assert_data_eq!(
+    assert_data_eq!
+    (
         foo.to_debug(),
-        str![[r#"
+        str!
+        [[
+            r#"
 Foo {
     foo: {
         Spanned {
@@ -448,20 +505,24 @@ Foo {
     },
 }
 
-"#]]
+"#
+        ]]
     );
-    good(input, &foo);
+    good(input, & foo);
 
     let input = "
-        [foo]
-        foo = { a = 'b', bar = 'baz', c = 'd', e = \"f\" }
-        bazz = {}
-        g = { h = 'i' }
-    ";
+                    [foo]
+                    foo = { a = 'b', bar = 'baz', c = 'd', e = \"f\" }
+                    bazz = {}
+                    g = { h = 'i' }
+                ";
     let foo: Foo = crate::from_str(input).unwrap();
-    assert_data_eq!(
+    assert_data_eq!
+    (
         foo.to_debug(),
-        str![[r#"
+        str!
+        [[
+            r#"
 Foo {
     foo: {
         Spanned {
@@ -516,17 +577,17 @@ Foo {
     },
 }
 
-"#]]
+"#
+        ]]
     );
-    good(input, &foo);
+    good(input, & foo);
 }
 
 #[test]
-fn test_spanned_array() {
-    #[derive(Debug, Deserialize)]
-    struct Foo {
-        foo: Vec<Spanned<BTreeMap<Spanned<String>, Spanned<String>>>>,
-    }
+fn test_spanned_array()
+{
+   #[derive(Debug, Deserialize)]
+    struct Foo { foo: Vec<Spanned<BTreeMap<Spanned<String>, Spanned<String>>>>, }
 
     let toml = "\
         [[foo]]
@@ -541,9 +602,12 @@ fn test_spanned_array() {
         e = \"h\"
     ";
     let foo_list: Foo = crate::from_str(toml).unwrap();
-    assert_data_eq!(
+    assert_data_eq!
+    (
         foo_list.to_debug(),
-        str![[r#"
+        str!
+        [[
+            r#"
 Foo {
     foo: [
         Spanned {
@@ -615,68 +679,75 @@ Foo {
     ],
 }
 
-"#]]
+"#
+        ]]
     );
 
-    for (foo, expected) in foo_list.foo.iter().zip([0..7, 84..91]) {
+    for (foo, expected) in foo_list.foo.iter().zip([0..7, 84..91])
+    {
         assert_eq!(foo.span(), expected);
-        for (k, v) in foo.as_ref().iter() {
-            assert_eq!(&toml[k.span().start..k.span().end], k.as_ref());
-            assert_eq!(&toml[(v.span().start + 1)..(v.span().end - 1)], v.as_ref());
+        for (k, v) in foo.as_ref().iter()
+        {
+            assert_eq!( & toml[k.span().start..k.span().end], k.as_ref());
+            assert_eq!( & toml[(v.span().start + 1)..(v.span().end - 1)], v.as_ref());
         }
     }
 }
 
 #[test]
-fn implicit_tables() {
-    #[derive(Debug)]
-    #[allow(dead_code)]
-    enum SpannedValue {
-        String(String),
-        Map(Vec<(Spanned<String>, Spanned<Self>)>),
-    }
+fn implicit_tables()
+{
+   #[derive(Debug)]
+   #[allow(dead_code)]
+    enum SpannedValue { String(String), Map(Vec<(Spanned<String>, Spanned<Self>)>), }
 
-    impl SpannedValue {
-        fn get(&self, key: &str) -> Option<&(Spanned<String>, Spanned<Self>)> {
-            let Self::Map(map) = self else {
-                return None;
-            };
+    impl SpannedValue
+    {
+        fn get( & self, key: & str) -> Option< & (Spanned<String>, Spanned<Self>)>
+        {
+            let Self::Map(map) = self else { return None; };
 
-            map.iter().find(|(k, _v)| k.get_ref() == key)
+            map.iter().find( | (k, _v) | k.get_ref() == key)
         }
     }
 
-    impl<'de> Deserialize<'de> for SpannedValue {
+    impl <'de> Deserialize<'de> for SpannedValue
+    {
         fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
         where
-            D: Deserializer<'de>,
+        D: Deserializer<'de>,
         {
-            let data = UntaggedEnumVisitor::new()
-                .string(|str| Ok(Self::String(str.into())))
-                .map(|mut map| {
-                    let mut result = Vec::new();
+            let data = UntaggedEnumVisitor:: new ()
+            .string( | str | Ok(Self::String(str.into())))
+            .map
+            (
+                | mut map |
+                {
+                    let mut result = Vec:: new ();
 
-                    while let Some((k, v)) = map.next_entry()? {
-                        result.push((k, v));
-                    }
+                    while let Some((k, v)) = map.next_entry()? { result.push((k, v)); }
 
                     Ok(Self::Map(result))
-                })
-                .deserialize(deserializer)?;
+                }
+            )
+            .deserialize(deserializer)?;
 
             Ok(data)
         }
     }
 
-    const INPUT: &str = r#"
+    const INPUT: & str = r#"
 [foo.bar]
 alice.bob = { one.two = "qux" }
 "#;
 
     let result = crate::from_str::<SpannedValue>(INPUT).unwrap();
-    assert_data_eq!(
+    assert_data_eq!
+    (
         result.to_debug(),
-        str![[r#"
+        str!
+        [[
+            r#"
 Map(
     [
         (
@@ -759,54 +830,58 @@ Map(
     ],
 )
 
-"#]]
+"#
+        ]]
     );
 
-    let foo = result.get("foo").unwrap();
-    assert_data_eq!(&INPUT[foo.0.span()], str!["foo"]);
-    assert_data_eq!(&INPUT[foo.1.span()], str!["foo"]);
-    let bar = foo.1.get_ref().get("bar").unwrap();
-    assert_data_eq!(&INPUT[bar.0.span()], str!["bar"]);
-    assert_data_eq!(&INPUT[bar.1.span()], str!["[foo.bar]"]);
-    let alice = bar.1.get_ref().get("alice").unwrap();
-    assert_data_eq!(&INPUT[alice.0.span()], str!["alice"]);
-    assert_data_eq!(&INPUT[alice.1.span()], str!["alice"]);
-    let bob = alice.1.get_ref().get("bob").unwrap();
-    assert_data_eq!(&INPUT[bob.0.span()], str!["bob"]);
-    assert_data_eq!(&INPUT[bob.1.span()], str![[r#"{ one.two = "qux" }"#]]);
-    let one = bob.1.get_ref().get("one").unwrap();
-    assert_data_eq!(&INPUT[one.0.span()], str!["one"]);
-    assert_data_eq!(&INPUT[one.1.span()], str!["one"]);
-    let two = one.1.get_ref().get("two").unwrap();
-    assert_data_eq!(&INPUT[two.0.span()], str!["two"]);
-    assert_data_eq!(&INPUT[two.1.span()], str![[r#""qux""#]]);
+    let foo = result. get("foo").unwrap();
+    assert_data_eq!( & INPUT[foo.0.span()], str ! ["foo"]);
+    assert_data_eq!( & INPUT[foo.1.span()], str ! ["foo"]);
+    let bar = foo.1.get_ref(). get("bar").unwrap();
+    assert_data_eq!( & INPUT[bar.0.span()], str ! ["bar"]);
+    assert_data_eq!( & INPUT[bar.1.span()], str ! ["[foo.bar]"]);
+    let alice = bar.1.get_ref(). get("alice").unwrap();
+    assert_data_eq!( & INPUT[alice.0.span()], str ! ["alice"]);
+    assert_data_eq!( & INPUT[alice.1.span()], str ! ["alice"]);
+    let bob = alice.1.get_ref(). get("bob").unwrap();
+    assert_data_eq!( & INPUT[bob.0.span()], str ! ["bob"]);
+    assert_data_eq!( & INPUT[bob.1.span()], str ! [[r#"{ one.two = "qux" }"#]]);
+    let one = bob.1.get_ref(). get("one").unwrap();
+    assert_data_eq!( & INPUT[one.0.span()], str ! ["one"]);
+    assert_data_eq!( & INPUT[one.1.span()], str ! ["one"]);
+    let two = one.1.get_ref(). get("two").unwrap();
+    assert_data_eq!( & INPUT[two.0.span()], str ! ["two"]);
+    assert_data_eq!( & INPUT[two.1.span()], str ! [[r#""qux""#]]);
 }
 
 #[test]
-fn deny_unknown_fields() {
-    #[derive(Debug, serde::Deserialize)]
-    #[serde(deny_unknown_fields)]
-    struct Example {
-        #[allow(dead_code)]
-        real: u32,
-    }
+fn deny_unknown_fields()
+{
+   #[derive(Debug, serde::Deserialize)]
+   #[serde(deny_unknown_fields)]
+    struct Example {#[allow(dead_code)] real: u32, }
 
-    let error = crate::from_str::<Example>(
+    let error = crate::from_str::<Example>
+    (
         r#"# my comment
 # bla bla bla
 fake = 1"#,
     )
     .unwrap_err();
-    assert_data_eq!(
+    assert_data_eq!
+    (
         error.to_string(),
-        str![[r#"
+        str!
+        [[
+            r#"
 TOML parse error at line 3, column 1
   |
 3 | fake = 1
   | ^^^^
 unknown field `fake`, expected `real`
 
-"#]]
+"#
+        ]]
         .raw()
     );
 }

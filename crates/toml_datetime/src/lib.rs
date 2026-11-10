@@ -34,6 +34,6 @@ pub use crate::datetime::DatetimeParseError;
 pub use crate::datetime::Offset;
 pub use crate::datetime::Time;
 
-#[doc = include_str!("../README.md")]
+#[doc = include_str ! ("../README.md")]
 #[cfg(doctest)]
 pub struct ReadmeDoctests;

@@ -2,7 +2,7 @@ use serde_core::de;
 use serde_core::ser;
 
 use crate::Value;
-use crate::alloc_prelude::*;
+use crate::alloc_prelude:: * ;
 use crate::map::Map;
 
 /// Type representing a TOML table, payload of the `Value::Table` variant.
@@ -13,17 +13,16 @@ use crate::map::Map;
 /// the source file.
 pub type Table = Map<String, Value>;
 
-impl Table {
+impl Table
+{
     /// Convert a `T` into `toml::Table`.
     ///
     /// This conversion can fail if `T`'s implementation of `Serialize` decides to
     /// fail, or if `T` contains a map with non-string keys.
     pub fn try_from<T>(value: T) -> Result<Self, crate::ser::Error>
     where
-        T: ser::Serialize,
-    {
-        value.serialize(TableSerializer)
-    }
+    T: ser::Serialize,
+    { value.serialize(TableSerializer) }
 
     /// Interpret a `toml::Table` as an instance of type `T`.
     ///
@@ -34,79 +33,67 @@ impl Table {
     /// the TOML map or some number is too big to fit in the expected primitive type.
     pub fn try_into<'de, T>(self) -> Result<T, crate::de::Error>
     where
-        T: de::Deserialize<'de>,
-    {
-        de::Deserialize::deserialize(self)
-    }
+    T: de::Deserialize<'de>,
+    { de::Deserialize::deserialize(self) }
 }
 
 #[cfg(feature = "display")]
-impl core::fmt::Display for Table {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        crate::ser::to_string(self)
-            .expect("Unable to represent value as string")
-            .fmt(f)
-    }
+impl core::fmt::Display for Table
+{
+    fn fmt( & self, f: & mut core::fmt::Formatter<'_>) -> core::fmt::Result { crate::ser::to_string(self).expect("Unable to represent value as string").fmt(f) }
 }
 
 #[cfg(feature = "parse")]
-impl core::str::FromStr for Table {
-    type Err = crate::de::Error;
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
-        crate::from_str(s)
-    }
-}
-impl ser::Serialize for Table {
-    #[inline]
-    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+impl core::str::FromStr for Table { type Err = crate::de::Error; fn from_str(s: & str) -> Result<Self, Self::Err> { crate::from_str(s) } }
+impl ser::Serialize for Table
+{
+   #[inline]
+    fn serialize<S>( & self, serializer: S) -> Result<S::Ok, S::Error>
     where
-        S: ser::Serializer,
+    S: ser::Serializer,
     {
         use serde_core::ser::SerializeMap;
         let mut map = serializer.serialize_map(Some(self.len()))?;
-        for (k, v) in self {
-            map.serialize_entry(k, v)?;
-        }
+        for (k, v) in self { map.serialize_entry(k, v)?; }
         map.end()
     }
 }
 
-impl<'de> de::Deserialize<'de> for Table {
-    #[inline]
+impl <'de> de::Deserialize<'de> for Table
+{
+   #[inline]
     fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
     where
-        D: de::Deserializer<'de>,
+    D: de::Deserializer<'de>,
     {
         struct Visitor;
 
-        impl<'de> de::Visitor<'de> for Visitor {
+        impl <'de> de::Visitor<'de> for Visitor
+        {
             type Value = Map<String, Value>;
 
-            fn expecting(&self, formatter: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-                formatter.write_str("a map")
-            }
+            fn expecting( & self, formatter: & mut core::fmt::Formatter<'_>) -> core::fmt::Result { formatter.write_str("a map") }
 
-            #[inline]
+           #[inline]
             fn visit_unit<E>(self) -> Result<Self::Value, E>
             where
-                E: de::Error,
-            {
-                Ok(Map::new())
-            }
+            E: de::Error,
+            { Ok(Map::new ()) }
 
-            #[inline]
+           #[inline]
             fn visit_map<V>(self, mut visitor: V) -> Result<Self::Value, V::Error>
             where
-                V: de::MapAccess<'de>,
+            V: de::MapAccess<'de>,
             {
-                let mut values = Map::new();
+                let mut values = Map:: new ();
 
-                while let Some(key) = visitor.next_key::<String>()? {
-                    match values.entry(key) {
-                        crate::map::Entry::Vacant(vacant) => {
-                            vacant.insert(visitor.next_value()?);
-                        }
-                        crate::map::Entry::Occupied(occupied) => {
+                while let Some(key) = visitor.next_key::<String>()?
+                {
+                    match values.entry(key)
+                    {
+                        crate::map::Entry::Vacant(vacant) => { vacant.insert(visitor.next_value()?); }
+                        crate::map::Entry::Occupied(occupied) =>
+                        {
                             let key = occupied.key();
                             let msg = format!("duplicate key: `{key}`");
                             return Err(de::Error::custom(msg));
@@ -122,79 +109,47 @@ impl<'de> de::Deserialize<'de> for Table {
     }
 }
 
-impl<'de> de::Deserializer<'de> for Table {
+impl <'de> de::Deserializer<'de> for Table
+{
     type Error = crate::de::Error;
 
     fn deserialize_any<V>(self, visitor: V) -> Result<V::Value, crate::de::Error>
     where
-        V: de::Visitor<'de>,
-    {
-        Value::Table(self).deserialize_any(visitor)
-    }
+    V: de::Visitor<'de>,
+    { Value::Table(self).deserialize_any(visitor) }
 
-    #[inline]
-    fn deserialize_enum<V>(
-        self,
-        name: &'static str,
-        variants: &'static [&'static str],
-        visitor: V,
-    ) -> Result<V::Value, crate::de::Error>
+   #[inline]
+    fn deserialize_enum<V>(self, name: & 'static str, variants: & 'static[ & 'static str], visitor: V,) -> Result<V::Value, crate::de::Error>
     where
-        V: de::Visitor<'de>,
-    {
-        Value::Table(self).deserialize_enum(name, variants, visitor)
-    }
+    V: de::Visitor<'de>,
+    { Value::Table(self).deserialize_enum(name, variants, visitor) }
 
     // `None` is interpreted as a missing field so be sure to implement `Some`
     // as a present field.
     fn deserialize_option<V>(self, visitor: V) -> Result<V::Value, crate::de::Error>
     where
-        V: de::Visitor<'de>,
-    {
-        Value::Table(self).deserialize_option(visitor)
-    }
+    V: de::Visitor<'de>,
+    { Value::Table(self).deserialize_option(visitor) }
 
-    fn deserialize_newtype_struct<V>(
-        self,
-        name: &'static str,
-        visitor: V,
-    ) -> Result<V::Value, crate::de::Error>
+    fn deserialize_newtype_struct<V>(self, name: & 'static str, visitor: V,) -> Result<V::Value, crate::de::Error>
     where
-        V: de::Visitor<'de>,
-    {
-        Value::Table(self).deserialize_newtype_struct(name, visitor)
-    }
+    V: de::Visitor<'de>,
+    { Value::Table(self).deserialize_newtype_struct(name, visitor) }
 
-    fn deserialize_struct<V>(
-        self,
-        name: &'static str,
-        fields: &'static [&'static str],
-        visitor: V,
-    ) -> Result<V::Value, crate::de::Error>
+    fn deserialize_struct<V>(self, name: & 'static str, fields: & 'static[ & 'static str], visitor: V,) -> Result<V::Value, crate::de::Error>
     where
-        V: de::Visitor<'de>,
-    {
-        Value::Table(self).deserialize_struct(name, fields, visitor)
-    }
+    V: de::Visitor<'de>,
+    { Value::Table(self).deserialize_struct(name, fields, visitor) }
 
-    serde_core::forward_to_deserialize_any! {
-        bool u8 u16 u32 u64 i8 i16 i32 i64 f32 f64 char str string unit seq
-        bytes byte_buf map unit_struct tuple_struct
-        tuple ignored_any identifier
-    }
+    serde_core::forward_to_deserialize_any! { bool u8 u16 u32 u64 i8 i16 i32 i64 f32 f64 char str string unit seq bytes byte_buf map unit_struct tuple_struct tuple ignored_any identifier }
 }
 
-impl de::IntoDeserializer<'_, crate::de::Error> for Table {
-    type Deserializer = Self;
+impl de::IntoDeserializer<'_, crate::de::Error> for Table { type Deserializer = Self; fn into_deserializer(self) -> Self { self } }
 
-    fn into_deserializer(self) -> Self {
-        self
-    }
-}
+pub (crate) struct TableSerializer;
 
-pub(crate) struct TableSerializer;
-
-impl ser::Serializer for TableSerializer {
+impl ser::Serializer for TableSerializer
+{
     type Ok = Table;
     type Error = crate::ser::Error;
 
@@ -206,255 +161,142 @@ impl ser::Serializer for TableSerializer {
     type SerializeStruct = SerializeMap;
     type SerializeStructVariant = ser::Impossible<Self::Ok, Self::Error>;
 
-    fn serialize_bool(self, _value: bool) -> Result<Table, crate::ser::Error> {
-        Err(crate::ser::Error::unsupported_type(None))
-    }
+    fn serialize_bool(self, _value: bool) -> Result<Table, crate::ser::Error> { Err(crate::ser::Error::unsupported_type(None)) }
 
-    fn serialize_i8(self, _value: i8) -> Result<Table, crate::ser::Error> {
-        Err(crate::ser::Error::unsupported_type(None))
-    }
+    fn serialize_i8(self, _value: i8) -> Result<Table, crate::ser::Error> { Err(crate::ser::Error::unsupported_type(None)) }
 
-    fn serialize_i16(self, _value: i16) -> Result<Table, crate::ser::Error> {
-        Err(crate::ser::Error::unsupported_type(None))
-    }
+    fn serialize_i16(self, _value: i16) -> Result<Table, crate::ser::Error> { Err(crate::ser::Error::unsupported_type(None)) }
 
-    fn serialize_i32(self, _value: i32) -> Result<Table, crate::ser::Error> {
-        Err(crate::ser::Error::unsupported_type(None))
-    }
+    fn serialize_i32(self, _value: i32) -> Result<Table, crate::ser::Error> { Err(crate::ser::Error::unsupported_type(None)) }
 
-    fn serialize_i64(self, _value: i64) -> Result<Table, crate::ser::Error> {
-        Err(crate::ser::Error::unsupported_type(None))
-    }
+    fn serialize_i64(self, _value: i64) -> Result<Table, crate::ser::Error> { Err(crate::ser::Error::unsupported_type(None)) }
 
-    fn serialize_u8(self, _value: u8) -> Result<Table, crate::ser::Error> {
-        Err(crate::ser::Error::unsupported_type(None))
-    }
+    fn serialize_u8(self, _value: u8) -> Result<Table, crate::ser::Error> { Err(crate::ser::Error::unsupported_type(None)) }
 
-    fn serialize_u16(self, _value: u16) -> Result<Table, crate::ser::Error> {
-        Err(crate::ser::Error::unsupported_type(None))
-    }
+    fn serialize_u16(self, _value: u16) -> Result<Table, crate::ser::Error> { Err(crate::ser::Error::unsupported_type(None)) }
 
-    fn serialize_u32(self, _value: u32) -> Result<Table, crate::ser::Error> {
-        Err(crate::ser::Error::unsupported_type(None))
-    }
+    fn serialize_u32(self, _value: u32) -> Result<Table, crate::ser::Error> { Err(crate::ser::Error::unsupported_type(None)) }
 
-    fn serialize_u64(self, _value: u64) -> Result<Table, crate::ser::Error> {
-        Err(crate::ser::Error::unsupported_type(None))
-    }
+    fn serialize_u64(self, _value: u64) -> Result<Table, crate::ser::Error> { Err(crate::ser::Error::unsupported_type(None)) }
 
-    fn serialize_f32(self, _value: f32) -> Result<Table, crate::ser::Error> {
-        Err(crate::ser::Error::unsupported_type(None))
-    }
+    fn serialize_f32(self, _value: f32) -> Result<Table, crate::ser::Error> { Err(crate::ser::Error::unsupported_type(None)) }
 
-    fn serialize_f64(self, _value: f64) -> Result<Table, crate::ser::Error> {
-        Err(crate::ser::Error::unsupported_type(None))
-    }
+    fn serialize_f64(self, _value: f64) -> Result<Table, crate::ser::Error> { Err(crate::ser::Error::unsupported_type(None)) }
 
-    fn serialize_char(self, _value: char) -> Result<Table, crate::ser::Error> {
-        Err(crate::ser::Error::unsupported_type(None))
-    }
+    fn serialize_char(self, _value: char) -> Result<Table, crate::ser::Error> { Err(crate::ser::Error::unsupported_type(None)) }
 
-    fn serialize_str(self, _value: &str) -> Result<Table, crate::ser::Error> {
-        Err(crate::ser::Error::unsupported_type(None))
-    }
+    fn serialize_str(self, _value: & str) -> Result<Table, crate::ser::Error> { Err(crate::ser::Error::unsupported_type(None)) }
 
-    fn serialize_bytes(self, _value: &[u8]) -> Result<Table, crate::ser::Error> {
-        Err(crate::ser::Error::unsupported_type(None))
-    }
+    fn serialize_bytes(self, _value: & [u8]) -> Result<Table, crate::ser::Error> { Err(crate::ser::Error::unsupported_type(None)) }
 
-    fn serialize_unit(self) -> Result<Table, crate::ser::Error> {
-        Err(crate::ser::Error::unsupported_type(None))
-    }
+    fn serialize_unit(self) -> Result<Table, crate::ser::Error> { Err(crate::ser::Error::unsupported_type(None)) }
 
-    fn serialize_unit_struct(self, _name: &'static str) -> Result<Table, crate::ser::Error> {
-        Err(crate::ser::Error::unsupported_type(None))
-    }
+    fn serialize_unit_struct(self, _name: & 'static str) -> Result<Table, crate::ser::Error> { Err(crate::ser::Error::unsupported_type(None)) }
 
-    fn serialize_unit_variant(
-        self,
-        name: &'static str,
-        _variant_index: u32,
-        _variant: &'static str,
-    ) -> Result<Table, crate::ser::Error> {
-        Err(crate::ser::Error::unsupported_type(Some(name)))
-    }
+    fn serialize_unit_variant(self, name: & 'static str, _variant_index: u32, _variant: & 'static str,) -> Result<Table, crate::ser::Error> { Err(crate::ser::Error::unsupported_type(Some(name))) }
 
-    fn serialize_newtype_struct<T>(
-        self,
-        _name: &'static str,
-        value: &T,
-    ) -> Result<Table, crate::ser::Error>
+    fn serialize_newtype_struct<T>(self, _name: & 'static str, value: & T,) -> Result<Table, crate::ser::Error>
     where
-        T: ser::Serialize + ?Sized,
-    {
-        value.serialize(self)
-    }
+    T: ser::Serialize + ? Sized,
+    { value.serialize(self) }
 
-    fn serialize_newtype_variant<T>(
-        self,
-        _name: &'static str,
-        _variant_index: u32,
-        variant: &'static str,
-        value: &T,
-    ) -> Result<Table, crate::ser::Error>
+    fn serialize_newtype_variant<T>(self, _name: & 'static str, _variant_index: u32, variant: & 'static str, value: & T,) -> Result<Table, crate::ser::Error>
     where
-        T: ser::Serialize + ?Sized,
+    T: ser::Serialize + ? Sized,
     {
         let value = value.serialize(crate::value::ValueSerializer)?;
-        let mut table = Table::new();
+        let mut table = Table:: new ();
         table.insert(variant.to_owned(), value);
         Ok(table)
     }
 
-    fn serialize_none(self) -> Result<Table, crate::ser::Error> {
-        Err(crate::ser::Error::unsupported_none())
-    }
+    fn serialize_none(self) -> Result<Table, crate::ser::Error> { Err(crate::ser::Error::unsupported_none()) }
 
-    fn serialize_some<T>(self, value: &T) -> Result<Table, crate::ser::Error>
+    fn serialize_some<T>(self, value: & T) -> Result<Table, crate::ser::Error>
     where
-        T: ser::Serialize + ?Sized,
-    {
-        value.serialize(self)
-    }
+    T: ser::Serialize + ? Sized,
+    { value.serialize(self) }
 
-    fn serialize_seq(self, _len: Option<usize>) -> Result<Self::SerializeSeq, crate::ser::Error> {
-        Err(crate::ser::Error::unsupported_type(None))
-    }
+    fn serialize_seq(self, _len: Option<usize>) -> Result<Self::SerializeSeq, crate::ser::Error> { Err(crate::ser::Error::unsupported_type(None)) }
 
-    fn serialize_tuple(self, _len: usize) -> Result<Self::SerializeTuple, crate::ser::Error> {
-        Err(crate::ser::Error::unsupported_type(None))
-    }
+    fn serialize_tuple(self, _len: usize) -> Result<Self::SerializeTuple, crate::ser::Error> { Err(crate::ser::Error::unsupported_type(None)) }
 
-    fn serialize_tuple_struct(
-        self,
-        name: &'static str,
-        _len: usize,
-    ) -> Result<Self::SerializeTupleStruct, crate::ser::Error> {
-        Err(crate::ser::Error::unsupported_type(Some(name)))
-    }
+    fn serialize_tuple_struct(self, name: & 'static str, _len: usize,) -> Result<Self::SerializeTupleStruct, crate::ser::Error> { Err(crate::ser::Error::unsupported_type(Some(name))) }
 
-    fn serialize_tuple_variant(
-        self,
-        name: &'static str,
-        _variant_index: u32,
-        _variant: &'static str,
-        _len: usize,
-    ) -> Result<Self::SerializeTupleVariant, crate::ser::Error> {
-        Err(crate::ser::Error::unsupported_type(Some(name)))
-    }
+    fn serialize_tuple_variant(self, name: & 'static str, _variant_index: u32, _variant: & 'static str, _len: usize,) -> Result<Self::SerializeTupleVariant, crate::ser::Error> { Err(crate::ser::Error::unsupported_type(Some(name))) }
 
-    fn serialize_map(self, _len: Option<usize>) -> Result<Self::SerializeMap, crate::ser::Error> {
-        Ok(SerializeMap::new())
-    }
+    fn serialize_map(self, _len: Option<usize>) -> Result<Self::SerializeMap, crate::ser::Error> { Ok(SerializeMap::new ()) }
 
-    fn serialize_struct(
-        self,
-        _name: &'static str,
-        len: usize,
-    ) -> Result<Self::SerializeStruct, crate::ser::Error> {
-        self.serialize_map(Some(len))
-    }
+    fn serialize_struct(self, _name: & 'static str, len: usize,) -> Result<Self::SerializeStruct, crate::ser::Error> { self.serialize_map(Some(len)) }
 
-    fn serialize_struct_variant(
-        self,
-        name: &'static str,
-        _variant_index: u32,
-        _variant: &'static str,
-        _len: usize,
-    ) -> Result<Self::SerializeStructVariant, crate::ser::Error> {
-        Err(crate::ser::Error::unsupported_type(Some(name)))
-    }
+    fn serialize_struct_variant(self, name: & 'static str, _variant_index: u32, _variant: & 'static str, _len: usize,) -> Result<Self::SerializeStructVariant, crate::ser::Error> { Err(crate::ser::Error::unsupported_type(Some(name))) }
 }
 
-pub(crate) struct SerializeMap {
-    map: Table,
-    next_key: Option<String>,
-}
+pub (crate) struct SerializeMap { map: Table, next_key: Option<String>, }
 
-impl SerializeMap {
-    pub(crate) fn new() -> Self {
-        Self {
-            map: Table::new(),
-            next_key: None,
-        }
-    }
+impl SerializeMap
+{
+    pub (crate) fn new () -> Self { Self { map: Table::new (), next_key: None, } }
 
-    pub(crate) fn with_capacity(capacity: usize) -> Self {
-        Self {
-            map: Table::with_capacity(capacity),
-            next_key: None,
-        }
-    }
+    pub (crate) fn with_capacity(capacity: usize) -> Self { Self { map: Table::with_capacity(capacity), next_key: None, } }
 
-    fn write_entry<T>(&mut self, key: String, value: &T) -> Result<(), crate::ser::Error>
+    fn write_entry<T>( & mut self, key: String, value: & T) -> Result<(), crate::ser::Error>
     where
-        T: ser::Serialize + ?Sized,
+    T: ser::Serialize + ? Sized,
     {
-        match Value::try_from(value) {
-            Ok(value) => {
-                self.map.insert(key, value);
-            }
-            Err(crate::ser::Error {
-                inner: crate::ser::ErrorInner::UnsupportedNone,
-            }) => {}
+        match Value::try_from(value)
+        {
+            Ok(value) => { self.map.insert(key, value); }
+            Err(crate::ser::Error { inner: crate::ser::ErrorInner::UnsupportedNone, }) => {}
             Err(e) => return Err(e),
         }
         Ok(())
     }
 }
 
-impl ser::SerializeMap for SerializeMap {
+impl ser::SerializeMap for SerializeMap
+{
     type Ok = Table;
     type Error = crate::ser::Error;
 
-    fn serialize_key<T>(&mut self, key: &T) -> Result<(), crate::ser::Error>
+    fn serialize_key<T>( & mut self, key: & T) -> Result<(), crate::ser::Error>
     where
-        T: ser::Serialize + ?Sized,
+    T: ser::Serialize + ? Sized,
     {
-        match Value::try_from(key)? {
-            Value::String(s) => self.next_key = Some(s),
-            _ => return Err(crate::ser::Error::key_not_string()),
-        };
+        match Value::try_from(key)? { Value::String(s) => self.next_key = Some(s), _ => return Err(crate::ser::Error::key_not_string()), };
         Ok(())
     }
 
-    fn serialize_value<T>(&mut self, value: &T) -> Result<(), crate::ser::Error>
+    fn serialize_value<T>( & mut self, value: & T) -> Result<(), crate::ser::Error>
     where
-        T: ser::Serialize + ?Sized,
+    T: ser::Serialize + ? Sized,
     {
         let key = self.next_key.take();
         let key = key.expect("serialize_value called before serialize_key");
         self.write_entry(key, value)
     }
 
-    fn serialize_entry<K, V>(&mut self, key: &K, value: &V) -> Result<(), Self::Error>
+    fn serialize_entry<K, V>( & mut self, key: & K, value: & V) -> Result<(), Self::Error>
     where
-        K: ser::Serialize + ?Sized,
-        V: ser::Serialize + ?Sized,
+    K: ser::Serialize + ? Sized,
+    V: ser::Serialize + ? Sized,
     {
-        let Value::String(key) = Value::try_from(key)? else {
-            return Err(crate::ser::Error::key_not_string());
-        };
+        let Value::String(key) = Value::try_from(key)? else { return Err(crate::ser::Error::key_not_string()); };
         self.write_entry(key, value)
     }
 
-    fn end(self) -> Result<Table, crate::ser::Error> {
-        Ok(self.map)
-    }
+    fn end(self) -> Result<Table, crate::ser::Error> { Ok(self.map) }
 }
 
-impl ser::SerializeStruct for SerializeMap {
+impl ser::SerializeStruct for SerializeMap
+{
     type Ok = Table;
     type Error = crate::ser::Error;
 
-    fn serialize_field<T>(&mut self, key: &'static str, value: &T) -> Result<(), crate::ser::Error>
+    fn serialize_field<T>( & mut self, key: & 'static str, value: & T) -> Result<(), crate::ser::Error>
     where
-        T: ser::Serialize + ?Sized,
-    {
-        ser::SerializeMap::serialize_entry(self, key, value)
-    }
+    T: ser::Serialize + ? Sized,
+    { ser::SerializeMap::serialize_entry(self, key, value) }
 
-    fn end(self) -> Result<Table, crate::ser::Error> {
-        ser::SerializeMap::end(self)
-    }
+    fn end(self) -> Result<Table, crate::ser::Error> { ser::SerializeMap::end(self) }
 }

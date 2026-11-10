@@ -28,7 +28,7 @@ extern crate alloc;
 mod macros;
 
 #[cfg(feature = "debug")]
-pub(crate) mod debug;
+pub (crate) mod debug;
 mod error;
 mod source;
 
@@ -44,6 +44,6 @@ pub use source::Source;
 pub use source::SourceIndex;
 pub use source::Span;
 
-#[doc = include_str!("../README.md")]
+#[doc = include_str ! ("../README.md")]
 #[cfg(doctest)]
 pub struct ReadmeDoctests;

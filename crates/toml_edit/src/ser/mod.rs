@@ -10,10 +10,11 @@ mod pretty;
 mod value;
 
 use crate::visit_mut::VisitMut as _;
+
 #[allow(clippy::wildcard_imports)]
-use array::*;
+use array:: * ;
 #[allow(clippy::wildcard_imports)]
-use map::*;
+use map:: * ;
 
 pub use error::Error;
 pub use value::ValueSerializer;
@@ -24,12 +25,10 @@ pub use value::ValueSerializer;
 /// fail, if `T` contains a map with non-string keys, or if `T` attempts to
 /// serialize an unsupported datatype such as an enum, tuple, or tuple struct.
 #[cfg(feature = "display")]
-pub fn to_vec<T>(value: &T) -> Result<Vec<u8>, Error>
+pub fn to_vec<T>(value: & T) -> Result<Vec<u8>, Error>
 where
-    T: serde_core::ser::Serialize + ?Sized,
-{
-    to_string(value).map(|e| e.into_bytes())
-}
+T: serde_core::ser::Serialize + ? Sized,
+{ to_string(value).map( | e | e.into_bytes()) }
 
 /// Serialize the given data structure as a String of TOML.
 ///
@@ -68,29 +67,28 @@ where
 /// println!("{}", toml)
 /// ```
 #[cfg(feature = "display")]
-pub fn to_string<T>(value: &T) -> Result<String, Error>
+pub fn to_string<T>(value: & T) -> Result<String, Error>
 where
-    T: serde_core::ser::Serialize + ?Sized,
-{
-    to_document(value).map(document_to_string)
-}
+T: serde_core::ser::Serialize + ? Sized,
+{ to_document(value).map(document_to_string) }
 
 /// Serialize the given data structure as a "pretty" String of TOML.
 ///
 /// This is identical to [`to_string`] except the output string has a more
 /// "pretty" output.
 #[cfg(feature = "display")]
-pub fn to_string_pretty<T>(value: &T) -> Result<String, Error>
+pub fn to_string_pretty<T>(value: & T) -> Result<String, Error>
 where
-    T: serde_core::ser::Serialize + ?Sized,
+T: serde_core::ser::Serialize + ? Sized,
 {
     let mut document = to_document(value)?;
-    pretty::Pretty::new().visit_document_mut(&mut document);
+    pretty::Pretty:: new ().visit_document_mut( & mut document);
     Ok(document_to_string(document))
 }
 
 #[cfg(feature = "display")]
-fn document_to_string(document: crate::DocumentMut) -> String {
+fn document_to_string(document: crate::DocumentMut) -> String
+{
     use std::fmt::Write as _;
 
     let mut output = String::with_capacity(128);
@@ -101,14 +99,14 @@ fn document_to_string(document: crate::DocumentMut) -> String {
 /// Serialize the given data structure into a TOML document.
 ///
 /// This would allow custom formatting to be applied, mixing with format preserving edits, etc.
-pub fn to_document<T>(value: &T) -> Result<crate::DocumentMut, Error>
+pub fn to_document<T>(value: & T) -> Result<crate::DocumentMut, Error>
 where
-    T: serde_core::ser::Serialize + ?Sized,
+T: serde_core::ser::Serialize + ? Sized,
 {
-    let value = value.serialize(ValueSerializer::new())?;
+    let value = value.serialize(ValueSerializer::new ())?;
     let item = crate::Item::Value(value);
     let root = item
-        .into_table()
-        .map_err(|_| Error::UnsupportedType(None))?;
+    .into_table()
+    .map_err( | _ | Error::UnsupportedType(None))?;
     Ok(root.into())
 }

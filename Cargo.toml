@@ -6,16 +6,8 @@ resolver = "3"
 repository = "https://github.com/toml-rs/toml"
 license = "MIT OR Apache-2.0"
 edition = "2024"
-rust-version = "1.85"  # MSRV
-include = [
-  "/build.rs",
-  "/src/**/*",
-  "/Cargo.toml",
-  "/Cargo.lock",
-  "/LICENSE*",
-  "/README.md",
-  "/examples/**/*"
-]
+rust-version = "1.85" # MSRV
+include = ["/build.rs", "/src/**/*", "/Cargo.toml", "/Cargo.lock", "/LICENSE*", "/README.md", "/examples/**/*"]
 
 [workspace.lints.rust]
 rust_2018_idioms = { level = "warn", priority = -1 }
@@ -33,7 +25,7 @@ unused_qualifications = "warn"
 #allow_attributes_without_reason = "warn"
 bool_assert_comparison = "allow"
 branches_sharing_code = "allow"
-byte_char_slices = "allow"  # sometimes explicit arrays are better
+byte_char_slices = "allow" # sometimes explicit arrays are better
 #cast_possible_truncation = "warn"
 #cast_possible_wrap = "warn"
 #cast_sign_loss = "warn"
@@ -68,7 +60,7 @@ invalid_upcast_comparisons = "warn"
 large_digit_groups = "warn"
 large_stack_arrays = "warn"
 large_types_passed_by_value = "warn"
-let_and_return = "allow"  # sometimes good to name what you are returning
+let_and_return = "allow" # sometimes good to name what you are returning
 linkedlist = "warn"
 lossy_float_literal = "warn"
 macro_use_imports = "warn"

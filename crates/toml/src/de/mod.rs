@@ -32,7 +32,7 @@ pub use parser::DeValue;
 
 pub use error::Error;
 
-use crate::alloc_prelude::*;
+use crate::alloc_prelude:: * ;
 
 /// Deserializes a string into a type.
 ///
@@ -69,12 +69,10 @@ use crate::alloc_prelude::*;
 /// ```
 #[cfg(feature = "parse")]
 #[cfg(feature = "serde")]
-pub fn from_str<'de, T>(s: &'de str) -> Result<T, Error>
+pub fn from_str<'de, T>(s: & 'de str) -> Result<T, Error>
 where
-    T: serde_core::de::Deserialize<'de>,
-{
-    T::deserialize(Deserializer::parse(s)?)
-}
+T: serde_core::de::Deserialize<'de>,
+{ T::deserialize(Deserializer::parse(s)?) }
 
 /// Deserializes bytes into a type.
 ///
@@ -84,10 +82,7 @@ where
 /// To deserializes TOML values, instead of documents, see [`ValueDeserializer`].
 #[cfg(feature = "parse")]
 #[cfg(feature = "serde")]
-pub fn from_slice<'de, T>(s: &'de [u8]) -> Result<T, Error>
+pub fn from_slice<'de, T>(s: & 'de[u8]) -> Result<T, Error>
 where
-    T: serde_core::de::Deserialize<'de>,
-{
-    let s = core::str::from_utf8(s).map_err(|e| Error::custom(e.to_string(), None))?;
-    from_str(s)
-}
+T: serde_core::de::Deserialize<'de>,
+{ let s = core::str::from_utf8(s).map_err( | e | Error::custom(e.to_string(), None))?; from_str(s) }

@@ -1,10 +1,14 @@
 #![recursion_limit = "256"]
 #![allow(clippy::dbg_macro)]
 
-macro_rules! parse_value {
-    ($s:expr) => {{
+macro_rules! parse_value
+{
+    ($s: expr)
+    =>
+    {{
         let v = $s.parse::<crate::RustValue>();
-        assert!(
+        assert!
+        (
             v.is_ok(),
             "Failed with `{}` when parsing:
 ```

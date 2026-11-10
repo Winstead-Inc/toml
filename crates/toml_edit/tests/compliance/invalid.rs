@@ -1,62 +1,78 @@
 use snapbox::assert_data_eq;
-use snapbox::prelude::*;
+use snapbox::prelude:: * ;
 use snapbox::str;
 
 #[track_caller]
-fn t(toml: &str, expected: impl IntoData) {
+fn t(toml: & str, expected: impl IntoData)
+{
     dbg!(toml);
-    match toml.parse::<crate::RustDocument>() {
-        Ok(s) => panic!("parsed to: {s:#?}"),
-        Err(e) => assert_data_eq!(e.to_string(), expected.raw()),
-    }
+    match toml.parse::<crate::RustDocument>() { Ok(s) => panic ! ("parsed to: {s:#?}"), Err(e) => assert_data_eq ! (e.to_string(), expected.raw()), }
 }
 
 #[test]
-fn basic_string_escape() {
-    t(
+fn basic_string_escape()
+{
+    t
+    (
         "a = \"\u{7f}\"",
-        str![[r#"
+        str!
+        [[
+            r#"
 TOML parse error at line 1, column 6
   |
 1 | a = ""
   |      ^
 invalid basic string, expected non-double-quote visible characters, `\`
 
-"#]],
+"#
+        ]],
     );
 }
 
 #[test]
-fn literal_escape() {
-    t(
+fn literal_escape()
+{
+    t
+    (
         "a = '\u{7f}'",
-        str![[r#"
+        str!
+        [[
+            r#"
 TOML parse error at line 1, column 6
   |
 1 | a = ''
   |      ^
 invalid literal string, expected non-single-quote visible characters
 
-"#]],
+"#
+        ]],
     );
 }
 
 #[test]
-fn stray_cr() {
-    t(
+fn stray_cr()
+{
+    t
+    (
         "\r",
-        str![[r#"
+        str!
+        [[
+            r#"
 TOML parse error at line 1, column 2
   |
 1 | 
   |  ^
 carriage return must be followed by newline, expected newline
 
-"#]],
+"#
+        ]],
     );
-    t(
+    t
+    (
         "a = [ \r ]",
-        str![[r#"
+        str!
+        [[
+            r#"
 TOML parse error at line 1, column 8
   |
 1 | a = [ 
@@ -64,11 +80,15 @@ TOML parse error at line 1, column 8
   |        ^
 carriage return must be followed by newline, expected newline
 
-"#]],
+"#
+        ]],
     );
-    t(
+    t
+    (
         "a = \"\"\"\r\"\"\"",
-        str![[r#"
+        str!
+        [[
+            r#"
 TOML parse error at line 1, column 9
   |
 1 | a = """
@@ -76,11 +96,15 @@ TOML parse error at line 1, column 9
   |         ^
 carriage return must be followed by newline, expected newline
 
-"#]],
+"#
+        ]],
     );
-    t(
+    t
+    (
         "a = \"\"\"\\  \r  \"\"\"",
-        str![[r#"
+        str!
+        [[
+            r#"
 TOML parse error at line 1, column 12
   |
 1 | a = """\  
@@ -88,11 +112,15 @@ TOML parse error at line 1, column 12
   |            ^
 carriage return must be followed by newline, expected newline
 
-"#]],
+"#
+        ]],
     );
-    t(
+    t
+    (
         "a = '''\r'''",
-        str![[r#"
+        str!
+        [[
+            r#"
 TOML parse error at line 1, column 9
   |
 1 | a = '''
@@ -100,11 +128,15 @@ TOML parse error at line 1, column 9
   |         ^
 carriage return must be followed by newline, expected newline
 
-"#]],
+"#
+        ]],
     );
-    t(
+    t
+    (
         "a = '\r'",
-        str![[r#"
+        str!
+        [[
+            r#"
 TOML parse error at line 1, column 6
   |
 1 | a = '
@@ -112,11 +144,15 @@ TOML parse error at line 1, column 6
   |      ^
 invalid literal string, expected non-single-quote visible characters
 
-"#]],
+"#
+        ]],
     );
-    t(
+    t
+    (
         "a = \"\r\"",
-        str![[r#"
+        str!
+        [[
+            r#"
 TOML parse error at line 1, column 6
   |
 1 | a = "
@@ -124,35 +160,45 @@ TOML parse error at line 1, column 6
   |      ^
 invalid basic string, expected non-double-quote visible characters, `\`
 
-"#]],
+"#
+        ]],
     );
 }
 
 #[test]
-fn duplicate_key_with_crlf() {
-    t(
+fn duplicate_key_with_crlf()
+{
+    t
+    (
         "\r\n\
          [t1]\r\n\
          [t2]\r\n\
          a = 1\r\n\
          a = 2\r\n\
          ",
-        str![[r#"
+        str!
+        [[
+            r#"
 TOML parse error at line 5, column 1
   |
 5 | a = 2
   | ^
 duplicate key
 
-"#]],
+"#
+        ]],
     );
 }
 
 #[test]
-fn inline_table_missing_key() {
-    t(
+fn inline_table_missing_key()
+{
+    t
+    (
         "={[]\r].",
-        str![[r#"
+        str!
+        [[
+            r#"
 TOML parse error at line 1, column 3
   |
 1 | ={[]
@@ -160,52 +206,61 @@ TOML parse error at line 1, column 3
   |   ^
 missing key for inline table element, expected key
 
-"#]],
+"#
+        ]],
     );
 }
 
 #[test]
-fn inline_table_missing_key_in_array() {
-    t(
+fn inline_table_missing_key_in_array()
+{
+    t
+    (
         "a=[{[]-]{\na.",
-        str![[r#"
+        str!
+        [[
+            r#"
 TOML parse error at line 1, column 5
   |
 1 | a=[{[]-]{
   |     ^
 missing key for inline table element, expected key
 
-"#]],
+"#
+        ]],
     );
 }
 
 #[test]
-fn emoji_error_span() {
+fn emoji_error_span()
+{
     let input = "key = 😀";
     dbg!(input);
     let err = input.parse::<crate::RustDocument>().unwrap_err();
-    dbg!(&err);
-    let actual = &input[err.span().unwrap()];
+    dbg!( & err);
+    let actual = & input[err.span().unwrap()];
     assert_eq!(actual, "😀");
 }
 
 #[test]
-fn text_error_span() {
+fn text_error_span()
+{
     let input = "key = asdf";
     dbg!(input);
     let err = input.parse::<crate::RustDocument>().unwrap_err();
-    dbg!(&err);
-    let actual = &input[err.span().unwrap()];
+    dbg!( & err);
+    let actual = & input[err.span().unwrap()];
     assert_eq!(actual, "asdf");
 }
 
 #[test]
-fn fuzzed_68144_error_span() {
+fn fuzzed_68144_error_span()
+{
     let input = "key = \"\\ᾂr\"";
     dbg!(input);
     let err = input.parse::<crate::RustDocument>().unwrap_err();
-    dbg!(&err);
-    let actual = &input[err.span().unwrap()];
+    dbg!( & err);
+    let actual = & input[err.span().unwrap()];
     // atm bad escape values are reported as missing escape values
     assert_eq!(actual, "");
 }

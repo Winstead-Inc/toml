@@ -24,28 +24,27 @@ pub use token::TokenKind;
 /// Lex TOML [tokens][Token]
 ///
 /// To get started, see [`Source::lex`][crate::Source::lex]
-pub struct Lexer<'i> {
-    stream: Stream<'i>,
-    eof: bool,
-}
+pub struct Lexer<'i> { stream: Stream<'i>, eof: bool , }
 
-impl<'i> Lexer<'i> {
-    pub(crate) fn new(input: &'i str) -> Self {
-        let mut stream = Stream::new(input);
-        if input.as_bytes().starts_with(BOM) {
+impl <'i> Lexer<'i>
+{
+    pub (crate) fn new (input: & 'i str) -> Self
+    {
+        let mut stream = Stream:: new (input);
+        if input.as_bytes().starts_with(BOM)
+        {
             let offset = BOM.len();
-            #[cfg(feature = "unsafe")] // SAFETY: only called when next character is ASCII
-            unsafe {
-                stream.next_slice_unchecked(offset)
-            };
-            #[cfg(not(feature = "unsafe"))]
+           #[cfg(feature = "unsafe")] // SAFETY: only called when next character is ASCII
+            unsafe { stream.next_slice_unchecked(offset) };
+           #[cfg(not(feature = "unsafe"))]
             stream.next_slice(offset);
         }
         Lexer { stream, eof: false }
     }
 
-    #[cfg(feature = "alloc")]
-    pub fn into_vec(self) -> Vec<Token> {
+   #[cfg(feature = "alloc")]
+    pub fn into_vec(self) -> Vec<Token>
+    {
         let len = self.stream.len();
         // The 2/7 ratio was determined by looking packaged manifests under a representative set of
         // packages determined by dependencies of several large, popular projects.
@@ -60,30 +59,36 @@ impl<'i> Lexer<'i> {
     }
 }
 
-impl Iterator for Lexer<'_> {
+impl Iterator for Lexer<'_>
+{
     type Item = Token;
 
-    fn next(&mut self) -> Option<Self::Item> {
-        let Some(peek_byte) = self.stream.as_bstr().first() else {
-            if self.eof {
-                return None;
-            } else {
+    fn next( & mut self) -> Option<Self::Item>
+    {
+        let Some(peek_byte) = self.stream.as_bstr().first()
+        else
+        {
+            if self.eof { return None; }
+            else
+            {
                 self.eof = true;
                 let start = self.stream.current_token_start();
                 let span = Span::new_unchecked(start, start);
-                return Some(Token::new(TokenKind::Eof, span));
+                return Some(Token::new (TokenKind::Eof, span));
             }
         };
-        Some(process_token(*peek_byte, &mut self.stream))
+        Some(process_token( * peek_byte, & mut self.stream))
     }
 }
 
-const BOM: &[u8] = b"\xEF\xBB\xBF";
+const BOM: & [u8] = b"\xEF\xBB\xBF";
 
-pub(crate) type Stream<'i> = winnow::stream::LocatingSlice<&'i str>;
+pub (crate) type Stream < 'i > = winnow::stream::LocatingSlice< & 'i str>;
 
-fn process_token(peek_byte: u8, stream: &mut Stream<'_>) -> Token {
-    let token = match peek_byte {
+fn process_token(peek_byte: u8, stream: & mut Stream<'_>) -> Token
+{
+    let token = match peek_byte
+    {
         b'.' => lex_ascii_char(stream, TokenKind::Dot),
         b'=' => lex_ascii_char(stream, TokenKind::Equals),
         b',' => lex_ascii_char(stream, TokenKind::Comma),
@@ -96,20 +101,8 @@ fn process_token(peek_byte: u8, stream: &mut Stream<'_>) -> Token {
         b'#' => lex_comment(stream),
         b'\r' => lex_crlf(stream),
         b'\n' => lex_ascii_char(stream, TokenKind::Newline),
-        b'\'' => {
-            if stream.starts_with(ML_LITERAL_STRING_DELIM) {
-                lex_ml_literal_string(stream)
-            } else {
-                lex_literal_string(stream)
-            }
-        }
-        b'"' => {
-            if stream.starts_with(ML_BASIC_STRING_DELIM) {
-                lex_ml_basic_string(stream)
-            } else {
-                lex_basic_string(stream)
-            }
-        }
+        b'\'' => { if stream.starts_with(ML_LITERAL_STRING_DELIM) { lex_ml_literal_string(stream) } else { lex_literal_string(stream) } }
+        b'"' => { if stream.starts_with(ML_BASIC_STRING_DELIM) { lex_ml_basic_string(stream) } else { lex_basic_string(stream) } }
         _ => lex_atom(stream),
     };
     token
@@ -122,21 +115,21 @@ fn process_token(peek_byte: u8, stream: &mut Stream<'_>) -> Token {
 /// - `stream` must be UTF-8
 /// - `stream` must be non-empty
 /// - `stream[0]` must be ASCII
-fn lex_ascii_char(stream: &mut Stream<'_>, kind: TokenKind) -> Token {
-    debug_assert!(!stream.is_empty());
+fn lex_ascii_char(stream: & mut Stream<'_>, kind: TokenKind) -> Token
+{
+    debug_assert!( ! stream.is_empty());
     let start = stream.current_token_start();
 
-    let offset = 1; // an ascii character
-    #[cfg(feature = "unsafe")] // SAFETY: only called when next character is ASCII
-    unsafe {
-        stream.next_slice_unchecked(offset)
-    };
-    #[cfg(not(feature = "unsafe"))]
+    let offset = 1;
+    // an ascii character
+   #[cfg(feature = "unsafe")] // SAFETY: only called when next character is ASCII
+    unsafe { stream.next_slice_unchecked(offset) };
+   #[cfg(not(feature = "unsafe"))]
     stream.next_slice(offset);
 
     let end = stream.previous_token_end();
     let span = Span::new_unchecked(start, end);
-    Token::new(kind, span)
+    Token:: new (kind, span)
 }
 
 /// Process Whitespace
@@ -153,31 +146,30 @@ fn lex_ascii_char(stream: &mut Stream<'_>, kind: TokenKind) -> Token {
 ///
 /// - `stream` must be UTF-8
 /// - `stream` must be non-empty
-fn lex_whitespace(stream: &mut Stream<'_>) -> Token {
-    debug_assert!(!stream.is_empty());
+fn lex_whitespace(stream: & mut Stream<'_>) -> Token
+{
+    debug_assert!( ! stream.is_empty());
     let start = stream.current_token_start();
 
     let offset = stream
-        .as_bstr()
-        .offset_for(|b| !WSCHAR.contains_token(b))
-        .unwrap_or(stream.eof_offset());
-    #[cfg(feature = "unsafe")] // SAFETY: WSCHAR ensures `offset` will be at UTF-8 boundary
-    unsafe {
-        stream.next_slice_unchecked(offset)
-    };
-    #[cfg(not(feature = "unsafe"))]
+    .as_bstr()
+    .offset_for( | b | ! WSCHAR.contains_token(b))
+    .unwrap_or(stream.eof_offset());
+   #[cfg(feature = "unsafe")] // SAFETY: WSCHAR ensures `offset` will be at UTF-8 boundary
+    unsafe { stream.next_slice_unchecked(offset) };
+   #[cfg(not(feature = "unsafe"))]
     stream.next_slice(offset);
 
     let end = stream.previous_token_end();
     let span = Span::new_unchecked(start, end);
-    Token::new(TokenKind::Whitespace, span)
+    Token:: new (TokenKind::Whitespace, span)
 }
 
 /// ```abnf
 /// wschar =  %x20  ; Space
 /// wschar =/ %x09  ; Horizontal tab
 /// ```
-pub(crate) const WSCHAR: (u8, u8) = (b' ', b'\t');
+pub (crate) const WSCHAR: (u8, u8) = (b' ', b'\t');
 
 /// Process Comment
 ///
@@ -195,30 +187,29 @@ pub(crate) const WSCHAR: (u8, u8) = (b' ', b'\t');
 ///
 /// - `stream` must be UTF-8
 /// - `stream[0] == b'#'`
-fn lex_comment(stream: &mut Stream<'_>) -> Token {
+fn lex_comment(stream: & mut Stream<'_>) -> Token
+{
     let start = stream.current_token_start();
 
     let offset = stream
-        .as_bytes()
-        .find_slice((b'\r', b'\n'))
-        .map(|s| s.start)
-        .unwrap_or_else(|| stream.eof_offset());
-    #[cfg(feature = "unsafe")] // SAFETY: newlines ensure `offset` is along UTF-8 boundary
-    unsafe {
-        stream.next_slice_unchecked(offset)
-    };
-    #[cfg(not(feature = "unsafe"))]
+    .as_bytes()
+    .find_slice((b'\r', b'\n'))
+    .map( | s | s.start)
+    .unwrap_or_else( || stream.eof_offset());
+   #[cfg(feature = "unsafe")] // SAFETY: newlines ensure `offset` is along UTF-8 boundary
+    unsafe { stream.next_slice_unchecked(offset) };
+   #[cfg(not(feature = "unsafe"))]
     stream.next_slice(offset);
 
     let end = stream.previous_token_end();
     let span = Span::new_unchecked(start, end);
-    Token::new(TokenKind::Comment, span)
+    Token:: new (TokenKind::Comment, span)
 }
 
 /// ```abnf
 /// comment-start-symbol = %x23 ; #
 /// ```
-pub(crate) const COMMENT_START_SYMBOL: u8 = b'#';
+pub (crate) const COMMENT_START_SYMBOL: u8 = b'#';
 
 /// Process Newline
 ///
@@ -233,25 +224,22 @@ pub(crate) const COMMENT_START_SYMBOL: u8 = b'#';
 ///
 /// - `stream` must be UTF-8
 /// - `stream[0] == b'\r'`
-fn lex_crlf(stream: &mut Stream<'_>) -> Token {
+fn lex_crlf(stream: & mut Stream<'_>) -> Token
+{
     let start = stream.current_token_start();
 
     let mut offset = '\r'.len_utf8();
-    let has_lf = stream.as_bstr().get(1) == Some(&b'\n');
-    if has_lf {
-        offset += '\n'.len_utf8();
-    }
+    let has_lf = stream.as_bstr(). get(1) == Some( & b'\n');
+    if has_lf { offset += '\n'.len_utf8(); }
 
-    #[cfg(feature = "unsafe")] // SAFETY: newlines ensure `offset` is along UTF-8 boundary
-    unsafe {
-        stream.next_slice_unchecked(offset)
-    };
-    #[cfg(not(feature = "unsafe"))]
+   #[cfg(feature = "unsafe")] // SAFETY: newlines ensure `offset` is along UTF-8 boundary
+    unsafe { stream.next_slice_unchecked(offset) };
+   #[cfg(not(feature = "unsafe"))]
     stream.next_slice(offset);
     let end = stream.previous_token_end();
     let span = Span::new_unchecked(start, end);
 
-    Token::new(TokenKind::Newline, span)
+    Token:: new (TokenKind::Newline, span)
 }
 
 /// Process literal string
@@ -270,44 +258,37 @@ fn lex_crlf(stream: &mut Stream<'_>) -> Token {
 ///
 /// - `stream` must be UTF-8
 /// - `stream[0] == b'\''`
-fn lex_literal_string(stream: &mut Stream<'_>) -> Token {
+fn lex_literal_string(stream: & mut Stream<'_>) -> Token
+{
     let start = stream.current_token_start();
 
-    let offset = 1; // APOSTROPHE
-    #[cfg(feature = "unsafe")] // SAFETY: only called when next character is ASCII
-    unsafe {
-        stream.next_slice_unchecked(offset)
-    };
-    #[cfg(not(feature = "unsafe"))]
+    let offset = 1;
+    // APOSTROPHE
+   #[cfg(feature = "unsafe")] // SAFETY: only called when next character is ASCII
+    unsafe { stream.next_slice_unchecked(offset) };
+   #[cfg(not(feature = "unsafe"))]
     stream.next_slice(offset);
 
-    let offset = match stream.as_bstr().find_slice((APOSTROPHE, b'\n')) {
-        Some(span) => {
-            if stream.as_bstr()[span.start] == APOSTROPHE {
-                span.end
-            } else {
-                span.start
-            }
-        }
+    let offset = match stream.as_bstr().find_slice((APOSTROPHE, b'\n'))
+    {
+        Some(span) => { if stream.as_bstr()[span.start] == APOSTROPHE { span.end } else { span.start } }
         None => stream.eof_offset(),
     };
-    #[cfg(feature = "unsafe")]
+   #[cfg(feature = "unsafe")]
     // SAFETY: `APOSTROPHE`/newline ensure `offset` is along UTF-8 boundary
-    unsafe {
-        stream.next_slice_unchecked(offset)
-    };
-    #[cfg(not(feature = "unsafe"))]
+    unsafe { stream.next_slice_unchecked(offset) };
+   #[cfg(not(feature = "unsafe"))]
     stream.next_slice(offset);
 
     let end = stream.previous_token_end();
     let span = Span::new_unchecked(start, end);
-    Token::new(TokenKind::LiteralString, span)
+    Token:: new (TokenKind::LiteralString, span)
 }
 
 /// ```abnf
 /// apostrophe = %x27 ; ' apostrophe
 /// ```
-pub(crate) const APOSTROPHE: u8 = b'\'';
+pub (crate) const APOSTROPHE: u8 = b'\'';
 
 /// Process multi-line literal string
 ///
@@ -327,59 +308,51 @@ pub(crate) const APOSTROPHE: u8 = b'\'';
 ///
 /// - `stream` must be UTF-8
 /// - `stream.starts_with(ML_LITERAL_STRING_DELIM)`
-fn lex_ml_literal_string(stream: &mut Stream<'_>) -> Token {
+fn lex_ml_literal_string(stream: & mut Stream<'_>) -> Token
+{
     let start = stream.current_token_start();
 
     let offset = ML_LITERAL_STRING_DELIM.len();
-    #[cfg(feature = "unsafe")] // SAFETY: only called when next character is ASCII
-    unsafe {
-        stream.next_slice_unchecked(offset)
-    };
-    #[cfg(not(feature = "unsafe"))]
+   #[cfg(feature = "unsafe")] // SAFETY: only called when next character is ASCII
+    unsafe { stream.next_slice_unchecked(offset) };
+   #[cfg(not(feature = "unsafe"))]
     stream.next_slice(offset);
 
-    let offset = match stream.as_bstr().find_slice(ML_LITERAL_STRING_DELIM) {
-        Some(span) => span.end,
-        None => stream.eof_offset(),
-    };
-    #[cfg(feature = "unsafe")]
+    let offset = match stream.as_bstr().find_slice(ML_LITERAL_STRING_DELIM) { Some(span) => span.end, None => stream.eof_offset(), };
+   #[cfg(feature = "unsafe")]
     // SAFETY: `ML_LITERAL_STRING_DELIM` ensure `offset` is along UTF-8 boundary
-    unsafe {
-        stream.next_slice_unchecked(offset)
-    };
-    #[cfg(not(feature = "unsafe"))]
+    unsafe { stream.next_slice_unchecked(offset) };
+   #[cfg(not(feature = "unsafe"))]
     stream.next_slice(offset);
 
-    if stream.as_bstr().peek_token() == Some(APOSTROPHE) {
+    if stream.as_bstr().peek_token() == Some(APOSTROPHE)
+    {
         let offset = 1;
-        #[cfg(feature = "unsafe")] // SAFETY: `APOSTROPHE` ensure `offset` is along UTF-8 boundary
-        unsafe {
-            stream.next_slice_unchecked(offset)
-        };
-        #[cfg(not(feature = "unsafe"))]
+       #[cfg(feature = "unsafe")] // SAFETY: `APOSTROPHE` ensure `offset` is along UTF-8 boundary
+        unsafe { stream.next_slice_unchecked(offset) };
+       #[cfg(not(feature = "unsafe"))]
         stream.next_slice(offset);
 
-        if stream.as_bstr().peek_token() == Some(APOSTROPHE) {
+        if stream.as_bstr().peek_token() == Some(APOSTROPHE)
+        {
             let offset = 1;
-            #[cfg(feature = "unsafe")]
+           #[cfg(feature = "unsafe")]
             // SAFETY: `APOSTROPHE` ensure `offset` is along UTF-8 boundary
-            unsafe {
-                stream.next_slice_unchecked(offset)
-            };
-            #[cfg(not(feature = "unsafe"))]
+            unsafe { stream.next_slice_unchecked(offset) };
+           #[cfg(not(feature = "unsafe"))]
             stream.next_slice(offset);
         }
     }
 
     let end = stream.previous_token_end();
     let span = Span::new_unchecked(start, end);
-    Token::new(TokenKind::MlLiteralString, span)
+    Token:: new (TokenKind::MlLiteralString, span)
 }
 
 /// ```abnf
 /// ml-literal-string-delim = 3apostrophe
 /// ```
-pub(crate) const ML_LITERAL_STRING_DELIM: &str = "'''";
+pub (crate) const ML_LITERAL_STRING_DELIM: & str = "'''";
 
 /// Process basic string
 ///
@@ -412,93 +385,92 @@ pub(crate) const ML_LITERAL_STRING_DELIM: &str = "'''";
 ///
 /// - `stream` must be UTF-8
 /// - `stream[0] == b'"'`
-fn lex_basic_string(stream: &mut Stream<'_>) -> Token {
+fn lex_basic_string(stream: & mut Stream<'_>) -> Token
+{
     let start = stream.current_token_start();
 
-    let offset = 1; // QUOTATION_MARK
-    #[cfg(feature = "unsafe")] // SAFETY: only called when next character is ASCII
-    unsafe {
-        stream.next_slice_unchecked(offset)
-    };
-    #[cfg(not(feature = "unsafe"))]
+    let offset = 1;
+    // QUOTATION_MARK
+   #[cfg(feature = "unsafe")] // SAFETY: only called when next character is ASCII
+    unsafe { stream.next_slice_unchecked(offset) };
+   #[cfg(not(feature = "unsafe"))]
     stream.next_slice(offset);
 
-    loop {
+    loop
+    {
         // newline is present for error recovery
-        match stream.as_bstr().find_slice((QUOTATION_MARK, ESCAPE, b'\n')) {
-            Some(span) => {
+        match stream.as_bstr().find_slice((QUOTATION_MARK, ESCAPE, b'\n'))
+        {
+            Some(span) =>
+            {
                 let found = stream.as_bstr()[span.start];
-                if found == QUOTATION_MARK {
+                if found == QUOTATION_MARK
+                {
                     let offset = span.end;
-                    #[cfg(feature = "unsafe")]
+                   #[cfg(feature = "unsafe")]
                     // SAFETY: `QUOTATION_MARK` ensure `offset` is along UTF-8 boundary
-                    unsafe {
-                        stream.next_slice_unchecked(offset)
-                    };
-                    #[cfg(not(feature = "unsafe"))]
+                    unsafe { stream.next_slice_unchecked(offset) };
+                   #[cfg(not(feature = "unsafe"))]
                     stream.next_slice(offset);
                     break;
-                } else if found == ESCAPE {
+                }
+                else if found == ESCAPE
+                {
                     let offset = span.end;
-                    #[cfg(feature = "unsafe")]
+                   #[cfg(feature = "unsafe")]
                     // SAFETY: `ESCAPE` / newline ensure `offset` is along UTF-8 boundary
-                    unsafe {
-                        stream.next_slice_unchecked(offset)
-                    };
-                    #[cfg(not(feature = "unsafe"))]
+                    unsafe { stream.next_slice_unchecked(offset) };
+                   #[cfg(not(feature = "unsafe"))]
                     stream.next_slice(offset);
 
                     let peek = stream.as_bstr().peek_token();
-                    match peek {
-                        Some(ESCAPE) | Some(QUOTATION_MARK) => {
-                            let offset = 1; // ESCAPE / QUOTATION_MARK
-                            #[cfg(feature = "unsafe")]
-                            #[cfg(feature = "unsafe")]
+                    match peek
+                    {
+                        Some(ESCAPE) | Some(QUOTATION_MARK) =>
+                        {
+                            let offset = 1;
+                            // ESCAPE / QUOTATION_MARK
+                           #[cfg(feature = "unsafe")]
+                           #[cfg(feature = "unsafe")]
                             // SAFETY: `ESCAPE` / newline ensure `offset` is along UTF-8 boundary
-                            unsafe {
-                                stream.next_slice_unchecked(offset)
-                            };
-                            #[cfg(not(feature = "unsafe"))]
+                            unsafe { stream.next_slice_unchecked(offset) };
+                           #[cfg(not(feature = "unsafe"))]
                             stream.next_slice(offset);
                         }
                         _ => {}
                     }
                     continue;
-                } else if found == b'\n' {
+                }
+                else if found == b'\n'
+                {
                     let offset = span.start;
-                    #[cfg(feature = "unsafe")]
+                   #[cfg(feature = "unsafe")]
                     // SAFETY: newline ensure `offset` is along UTF-8 boundary
-                    unsafe {
-                        stream.next_slice_unchecked(offset)
-                    };
-                    #[cfg(not(feature = "unsafe"))]
+                    unsafe { stream.next_slice_unchecked(offset) };
+                   #[cfg(not(feature = "unsafe"))]
                     stream.next_slice(offset);
                     break;
-                } else {
-                    unreachable!("found `{found}`");
                 }
+                else { unreachable ! ("found `{found}`"); }
             }
-            None => {
-                stream.finish();
-                break;
-            }
+            None => { stream.finish(); break ; }
         }
     }
 
     let end = stream.previous_token_end();
     let span = Span::new_unchecked(start, end);
-    Token::new(TokenKind::BasicString, span)
+    Token:: new (TokenKind::BasicString, span)
 }
 
 /// ```abnf
 /// quotation-mark = %x22            ; "
 /// ```
-pub(crate) const QUOTATION_MARK: u8 = b'"';
+pub (crate) const QUOTATION_MARK: u8 = b'"';
 
 /// ```abnf
 /// escape = %x5C                   ; \
 /// ```
-pub(crate) const ESCAPE: u8 = b'\\';
+pub (crate) const ESCAPE: u8 = b'\\';
 
 /// Process multi-line basic string
 ///
@@ -519,97 +491,93 @@ pub(crate) const ESCAPE: u8 = b'\\';
 ///
 /// - `stream` must be UTF-8
 /// - `stream.starts_with(ML_BASIC_STRING_DELIM)`
-fn lex_ml_basic_string(stream: &mut Stream<'_>) -> Token {
+fn lex_ml_basic_string(stream: & mut Stream<'_>) -> Token
+{
     let start = stream.current_token_start();
 
     let offset = ML_BASIC_STRING_DELIM.len();
-    #[cfg(feature = "unsafe")] // SAFETY: only called when next character is ASCII
-    unsafe {
-        stream.next_slice_unchecked(offset)
-    };
-    #[cfg(not(feature = "unsafe"))]
+   #[cfg(feature = "unsafe")] // SAFETY: only called when next character is ASCII
+    unsafe { stream.next_slice_unchecked(offset) };
+   #[cfg(not(feature = "unsafe"))]
     stream.next_slice(offset);
 
-    loop {
+    loop
+    {
         // newline is present for error recovery
-        match stream.as_bstr().find_slice((ML_BASIC_STRING_DELIM, "\\")) {
-            Some(span) => {
+        match stream.as_bstr().find_slice((ML_BASIC_STRING_DELIM, "\\"))
+        {
+            Some(span) =>
+            {
                 let found = stream.as_bstr()[span.start];
-                if found == QUOTATION_MARK {
+                if found == QUOTATION_MARK
+                {
                     let offset = span.end;
-                    #[cfg(feature = "unsafe")]
+                   #[cfg(feature = "unsafe")]
                     // SAFETY: `QUOTATION_MARK` ensure `offset` is along UTF-8 boundary
-                    unsafe {
-                        stream.next_slice_unchecked(offset)
-                    };
-                    #[cfg(not(feature = "unsafe"))]
+                    unsafe { stream.next_slice_unchecked(offset) };
+                   #[cfg(not(feature = "unsafe"))]
                     stream.next_slice(offset);
                     break;
-                } else if found == ESCAPE {
+                }
+                else if found == ESCAPE
+                {
                     let offset = span.end;
-                    #[cfg(feature = "unsafe")]
+                   #[cfg(feature = "unsafe")]
                     // SAFETY: `ESCAPE` ensure `offset` is along UTF-8 boundary
-                    unsafe {
-                        stream.next_slice_unchecked(offset)
-                    };
-                    #[cfg(not(feature = "unsafe"))]
+                    unsafe { stream.next_slice_unchecked(offset) };
+                   #[cfg(not(feature = "unsafe"))]
                     stream.next_slice(offset);
 
                     let peek = stream.as_bstr().peek_token();
-                    match peek {
-                        Some(ESCAPE) | Some(QUOTATION_MARK) => {
-                            let offset = 1; // ESCAPE / QUOTATION_MARK
-                            #[cfg(feature = "unsafe")]
+                    match peek
+                    {
+                        Some(ESCAPE) | Some(QUOTATION_MARK) =>
+                        {
+                            let offset = 1;
+                            // ESCAPE / QUOTATION_MARK
+                           #[cfg(feature = "unsafe")]
                             // SAFETY: `QUOTATION_MARK`/`ESCAPE` ensure `offset` is along UTF-8 boundary
-                            unsafe {
-                                stream.next_slice_unchecked(offset)
-                            };
-                            #[cfg(not(feature = "unsafe"))]
+                            unsafe { stream.next_slice_unchecked(offset) };
+                           #[cfg(not(feature = "unsafe"))]
                             stream.next_slice(offset);
                         }
                         _ => {}
                     }
                     continue;
-                } else {
-                    unreachable!("found `{found}`");
                 }
+                else { unreachable ! ("found `{found}`"); }
             }
-            None => {
-                stream.finish();
-                break;
-            }
+            None => { stream.finish(); break ; }
         }
     }
-    if stream.as_bstr().peek_token() == Some(QUOTATION_MARK) {
+    if stream.as_bstr().peek_token() == Some(QUOTATION_MARK)
+    {
         let offset = 1;
-        #[cfg(feature = "unsafe")]
+       #[cfg(feature = "unsafe")]
         // SAFETY: `QUOTATION_MARK` ensure `offset` is along UTF-8 boundary
-        unsafe {
-            stream.next_slice_unchecked(offset)
-        };
-        #[cfg(not(feature = "unsafe"))]
+        unsafe { stream.next_slice_unchecked(offset) };
+       #[cfg(not(feature = "unsafe"))]
         stream.next_slice(offset);
-        if stream.as_bstr().peek_token() == Some(QUOTATION_MARK) {
+        if stream.as_bstr().peek_token() == Some(QUOTATION_MARK)
+        {
             let offset = 1;
-            #[cfg(feature = "unsafe")]
+           #[cfg(feature = "unsafe")]
             // SAFETY: `QUOTATION_MARK` ensure `offset` is along UTF-8 boundary
-            unsafe {
-                stream.next_slice_unchecked(offset)
-            };
-            #[cfg(not(feature = "unsafe"))]
+            unsafe { stream.next_slice_unchecked(offset) };
+           #[cfg(not(feature = "unsafe"))]
             stream.next_slice(offset);
         }
     }
 
     let end = stream.previous_token_end();
     let span = Span::new_unchecked(start, end);
-    Token::new(TokenKind::MlBasicString, span)
+    Token:: new (TokenKind::MlBasicString, span)
 }
 
 /// ```abnf
 /// ml-basic-string-delim = 3quotation-mark
 /// ```
-pub(crate) const ML_BASIC_STRING_DELIM: &str = "\"\"\"";
+pub (crate) const ML_BASIC_STRING_DELIM: & str = "\"\"\"";
 
 /// Process Atom
 ///
@@ -619,23 +587,22 @@ pub(crate) const ML_BASIC_STRING_DELIM: &str = "\"\"\"";
 ///
 /// - `stream` must be UTF-8
 /// - `stream` must be non-empty
-fn lex_atom(stream: &mut Stream<'_>) -> Token {
+fn lex_atom(stream: & mut Stream<'_>) -> Token
+{
     let start = stream.current_token_start();
 
     // Intentionally leaves off quotes in case the opening quote was missing
-    const TOKEN_START: &[u8] = b".=,[]{} \t#\r\n";
+    const TOKEN_START: & [u8] = b".=,[]{} \t#\r\n";
     let offset = stream
-        .as_bstr()
-        .offset_for(|b| TOKEN_START.contains_token(b))
-        .unwrap_or_else(|| stream.eof_offset());
-    #[cfg(feature = "unsafe")] // SAFETY: `TOKEN_START` ensure `offset` is along UTF-8 boundary
-    unsafe {
-        stream.next_slice_unchecked(offset)
-    };
-    #[cfg(not(feature = "unsafe"))]
+    .as_bstr()
+    .offset_for( | b | TOKEN_START.contains_token(b))
+    .unwrap_or_else( || stream.eof_offset());
+   #[cfg(feature = "unsafe")] // SAFETY: `TOKEN_START` ensure `offset` is along UTF-8 boundary
+    unsafe { stream.next_slice_unchecked(offset) };
+   #[cfg(not(feature = "unsafe"))]
     stream.next_slice(offset);
 
     let end = stream.previous_token_end();
     let span = Span::new_unchecked(start, end);
-    Token::new(TokenKind::Atom, span)
+    Token:: new (TokenKind::Atom, span)
 }

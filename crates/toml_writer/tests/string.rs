@@ -1,8 +1,8 @@
 #![cfg(feature = "alloc")]
 #![allow(clippy::dbg_macro)] // unsure why config isn't working
 
-use proptest::prelude::*;
-use snapbox::prelude::*;
+use proptest::prelude:: * ;
+use snapbox::prelude:: * ;
 use snapbox::str;
 
 use toml_writer::ToTomlKey;
@@ -11,23 +11,25 @@ use toml_writer::TomlKeyBuilder;
 use toml_writer::TomlStringBuilder;
 
 #[track_caller]
-fn t(decoded: &str, expected: impl IntoData) {
-    let key = TomlKeyBuilder::new(decoded);
-    let string = TomlStringBuilder::new(decoded);
-    dbg!(&key);
-    dbg!(&string);
-    let results = StringResults {
+fn t(decoded: & str, expected: impl IntoData)
+{
+    let key = TomlKeyBuilder:: new (decoded);
+    let string = TomlStringBuilder:: new (decoded);
+    dbg!( & key);
+    dbg!( & string);
+    let results = StringResults
+    {
         decoded,
         key_default: key.as_default().to_toml_key(),
-        key_unquoted: key.as_unquoted().map(|k| k.to_toml_key()),
-        key_literal: key.as_literal().map(|k| k.to_toml_key()),
-        key_basic_pretty: key.as_basic_pretty().map(|k| k.to_toml_key()),
+        key_unquoted: key.as_unquoted().map( | k | k.to_toml_key()),
+        key_literal: key.as_literal().map( | k | k.to_toml_key()),
+        key_basic_pretty: key.as_basic_pretty().map( | k | k.to_toml_key()),
         key_basic: key.as_basic().to_toml_key(),
         string_default: string.as_default().to_toml_value(),
-        string_literal: string.as_literal().map(|k| k.to_toml_value()),
-        string_ml_literal: string.as_ml_literal().map(|k| k.to_toml_value()),
-        string_basic_pretty: string.as_basic_pretty().map(|k| k.to_toml_value()),
-        string_ml_basic_pretty: string.as_ml_basic_pretty().map(|k| k.to_toml_value()),
+        string_literal: string.as_literal().map( | k | k.to_toml_value()),
+        string_ml_literal: string.as_ml_literal().map( | k | k.to_toml_value()),
+        string_basic_pretty: string.as_basic_pretty().map( | k | k.to_toml_value()),
+        string_ml_basic_pretty: string.as_ml_basic_pretty().map( | k | k.to_toml_value()),
         string_basic: string.as_basic().to_toml_value(),
         string_ml_basic: string.as_ml_basic().to_toml_value(),
     };
@@ -36,12 +38,9 @@ fn t(decoded: &str, expected: impl IntoData) {
     // Verify defaults are compatible with the old TOML parser so new Cargo doesn't cause an MSRV
     // bump
     let toml = format!("{} = {}", results.key_default, results.string_default);
-    dbg!(&toml);
+    dbg!( & toml);
     let value = toml.parse::<toml_old::Value>();
-    let value = match value {
-        Ok(value) => value,
-        Err(err) => panic!("could not parse: {err}"),
-    };
+    let value = match value { Ok(value) => value, Err(err) => panic ! ("could not parse: {err}"), };
     let table = value.as_table().unwrap();
     let (key, value) = table.iter().next().unwrap();
     assert_eq!(key, decoded);
@@ -50,8 +49,9 @@ fn t(decoded: &str, expected: impl IntoData) {
 
 #[derive(Debug)]
 #[allow(dead_code)]
-struct StringResults<'i> {
-    decoded: &'i str,
+struct StringResults<'i>
+{
+    decoded: & 'i str,
     key_default: String,
     key_unquoted: Option<String>,
     key_literal: Option<String>,
@@ -67,10 +67,14 @@ struct StringResults<'i> {
 }
 
 #[test]
-fn empty() {
-    t(
+fn empty()
+{
+    t
+    (
         "",
-        str![[r#"
+        str!
+        [[
+            r#"
 StringResults {
     decoded: "",
     key_default: "\"\"",
@@ -99,15 +103,20 @@ StringResults {
     string_ml_basic: "\"\"\"\"\"\"",
 }
 
-"#]],
+"#
+        ]],
     );
 }
 
 #[test]
-fn alpha() {
-    t(
+fn alpha()
+{
+    t
+    (
         "helloworld",
-        str![[r#"
+        str!
+        [[
+            r#"
 StringResults {
     decoded: "helloworld",
     key_default: "helloworld",
@@ -138,15 +147,20 @@ StringResults {
     string_ml_basic: "\"\"\"helloworld\"\"\"",
 }
 
-"#]],
+"#
+        ]],
     );
 }
 
 #[test]
-fn ident() {
-    t(
+fn ident()
+{
+    t
+    (
         "_hello-world_",
-        str![[r#"
+        str!
+        [[
+            r#"
 StringResults {
     decoded: "_hello-world_",
     key_default: "_hello-world_",
@@ -177,15 +191,20 @@ StringResults {
     string_ml_basic: "\"\"\"_hello-world_\"\"\"",
 }
 
-"#]],
+"#
+        ]],
     );
 }
 
 #[test]
-fn one_single_quote() {
-    t(
+fn one_single_quote()
+{
+    t
+    (
         "'hello'world'",
-        str![[r#"
+        str!
+        [[
+            r#"
 StringResults {
     decoded: "'hello'world'",
     key_default: "\"'hello'world'\"",
@@ -210,15 +229,20 @@ StringResults {
     string_ml_basic: "\"\"\"'hello'world'\"\"\"",
 }
 
-"#]],
+"#
+        ]],
     );
 }
 
 #[test]
-fn two_single_quote() {
-    t(
+fn two_single_quote()
+{
+    t
+    (
         "''hello''world''",
-        str![[r#"
+        str!
+        [[
+            r#"
 StringResults {
     decoded: "''hello''world''",
     key_default: "\"''hello''world''\"",
@@ -243,15 +267,20 @@ StringResults {
     string_ml_basic: "\"\"\"''hello''world''\"\"\"",
 }
 
-"#]],
+"#
+        ]],
     );
 }
 
 #[test]
-fn three_single_quote() {
-    t(
+fn three_single_quote()
+{
+    t
+    (
         "'''hello'''world'''",
-        str![[r#"
+        str!
+        [[
+            r#"
 StringResults {
     decoded: "'''hello'''world'''",
     key_default: "\"'''hello'''world'''\"",
@@ -274,15 +303,20 @@ StringResults {
     string_ml_basic: "\"\"\"'''hello'''world'''\"\"\"",
 }
 
-"#]],
+"#
+        ]],
     );
 }
 
 #[test]
-fn one_double_quote() {
-    t(
+fn one_double_quote()
+{
+    t
+    (
         r#""hello"world""#,
-        str![[r#"
+        str!
+        [[
+            r#"
 StringResults {
     decoded: "\"hello\"world\"",
     key_default: "'\"hello\"world\"'",
@@ -307,15 +341,20 @@ StringResults {
     string_ml_basic: "\"\"\"\"hello\"world\"\"\"\"",
 }
 
-"#]],
+"#
+        ]],
     );
 }
 
 #[test]
-fn two_double_quote() {
-    t(
+fn two_double_quote()
+{
+    t
+    (
         r#"""hello""world"""#,
-        str![[r#"
+        str!
+        [[
+            r#"
 StringResults {
     decoded: "\"\"hello\"\"world\"\"",
     key_default: "'\"\"hello\"\"world\"\"'",
@@ -340,15 +379,20 @@ StringResults {
     string_ml_basic: "\"\"\"\"\"hello\"\"world\"\"\"\"\"",
 }
 
-"#]],
+"#
+        ]],
     );
 }
 
 #[test]
-fn three_double_quote() {
-    t(
+fn three_double_quote()
+{
+    t
+    (
         r#""""hello"""world""""#,
-        str![[r#"
+        str!
+        [[
+            r#"
 StringResults {
     decoded: "\"\"\"hello\"\"\"world\"\"\"",
     key_default: "'\"\"\"hello\"\"\"world\"\"\"'",
@@ -371,15 +415,20 @@ StringResults {
     string_ml_basic: "\"\"\"\"\"\\\"hello\"\"\\\"world\"\"\\\"\"\"\"",
 }
 
-"#]],
+"#
+        ]],
     );
 }
 
 #[test]
-fn mixed_quote_1() {
-    t(
+fn mixed_quote_1()
+{
+    t
+    (
         r#""'"#,
-        str![[r#"
+        str!
+        [[
+            r#"
 StringResults {
     decoded: "\"'",
     key_default: "\"\\\"'\"",
@@ -400,15 +449,20 @@ StringResults {
     string_ml_basic: "\"\"\"\"'\"\"\"",
 }
 
-"#]],
+"#
+        ]],
     );
 }
 
 #[test]
-fn mixed_quote_2() {
-    t(
+fn mixed_quote_2()
+{
+    t
+    (
         r#"mixed quoted \"start\" 'end'' mixed quote"#,
-        str![[r#"
+        str!
+        [[
+            r#"
 StringResults {
     decoded: "mixed quoted \\\"start\\\" 'end'' mixed quote",
     key_default: "\"mixed quoted \\\\\\\"start\\\\\\\" 'end'' mixed quote\"",
@@ -427,15 +481,20 @@ StringResults {
     string_ml_basic: "\"\"\"mixed quoted \\\\\"start\\\\\" 'end'' mixed quote\"\"\"",
 }
 
-"#]],
+"#
+        ]],
     );
 }
 
 #[test]
-fn escape() {
-    t(
+fn escape()
+{
+    t
+    (
         r#"\windows\system32\"#,
-        str![[r#"
+        str!
+        [[
+            r#"
 StringResults {
     decoded: "\\windows\\system32\\",
     key_default: "'\\windows\\system32\\'",
@@ -458,15 +517,20 @@ StringResults {
     string_ml_basic: "\"\"\"\\\\windows\\\\system32\\\\\"\"\"",
 }
 
-"#]],
+"#
+        ]],
     );
 }
 
 #[test]
-fn cr() {
-    t(
+fn cr()
+{
+    t
+    (
         "\rhello\rworld\r",
-        str![[r#"
+        str!
+        [[
+            r#"
 StringResults {
     decoded: "\rhello\rworld\r",
     key_default: "\"\\rhello\\rworld\\r\"",
@@ -483,15 +547,20 @@ StringResults {
     string_ml_basic: "\"\"\"\\rhello\\rworld\\r\"\"\"",
 }
 
-"#]],
+"#
+        ]],
     );
 }
 
 #[test]
-fn lf() {
-    t(
+fn lf()
+{
+    t
+    (
         "\nhello\nworld\n",
-        str![[r#"
+        str!
+        [[
+            r#"
 StringResults {
     decoded: "\nhello\nworld\n",
     key_default: "\"\\nhello\\nworld\\n\"",
@@ -512,15 +581,20 @@ StringResults {
     string_ml_basic: "\"\"\"\n\nhello\nworld\n\"\"\"",
 }
 
-"#]],
+"#
+        ]],
     );
 }
 
 #[test]
-fn crlf() {
-    t(
+fn crlf()
+{
+    t
+    (
         "\r\nhello\r\nworld\r\n",
-        str![[r#"
+        str!
+        [[
+            r#"
 StringResults {
     decoded: "\r\nhello\r\nworld\r\n",
     key_default: "\"\\r\\nhello\\r\\nworld\\r\\n\"",
@@ -537,15 +611,20 @@ StringResults {
     string_ml_basic: "\"\"\"\n\\r\nhello\\r\nworld\\r\n\"\"\"",
 }
 
-"#]],
+"#
+        ]],
     );
 }
 
 #[test]
-fn tab() {
-    t(
+fn tab()
+{
+    t
+    (
         "\thello\tworld\t",
-        str![[r#"
+        str!
+        [[
+            r#"
 StringResults {
     decoded: "\thello\tworld\t",
     key_default: "\"\\thello\\tworld\\t\"",
@@ -574,15 +653,20 @@ StringResults {
     string_ml_basic: "\"\"\"\\thello\\tworld\\t\"\"\"",
 }
 
-"#]],
+"#
+        ]],
     );
 }
 
 #[test]
-fn rust_attribute() {
-    t(
+fn rust_attribute()
+{
+    t
+    (
         "cfg(target_os = \"linux\")",
-        str![[r#"
+        str!
+        [[
+            r#"
 StringResults {
     decoded: "cfg(target_os = \"linux\")",
     key_default: "'cfg(target_os = \"linux\")'",
@@ -607,15 +691,20 @@ StringResults {
     string_ml_basic: "\"\"\"cfg(target_os = \"linux\")\"\"\"",
 }
 
-"#]],
+"#
+        ]],
     );
 }
 
 #[test]
-fn dotted_path() {
-    t(
+fn dotted_path()
+{
+    t
+    (
         "io.containerd.grpc.v1.cri",
-        str![[r#"
+        str!
+        [[
+            r#"
 StringResults {
     decoded: "io.containerd.grpc.v1.cri",
     key_default: "\"io.containerd.grpc.v1.cri\"",
@@ -644,15 +733,20 @@ StringResults {
     string_ml_basic: "\"\"\"io.containerd.grpc.v1.cri\"\"\"",
 }
 
-"#]],
+"#
+        ]],
     );
 }
 
 #[test]
-fn many_quotes() {
-    t(
-        &"\"".repeat(256),
-        str![[r#"
+fn many_quotes()
+{
+    t
+    (
+        & "\"".repeat(256),
+        str!
+        [[
+            r#"
 StringResults {
     decoded: "\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"",
     key_default: "'\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"'",
@@ -675,31 +769,31 @@ StringResults {
     string_ml_basic: "\"\"\"\"\"\\\"\"\"\\\"\"\"\\\"\"\"\\\"\"\"\\\"\"\"\\\"\"\"\\\"\"\"\\\"\"\"\\\"\"\"\\\"\"\"\\\"\"\"\\\"\"\"\\\"\"\"\\\"\"\"\\\"\"\"\\\"\"\"\\\"\"\"\\\"\"\"\\\"\"\"\\\"\"\"\\\"\"\"\\\"\"\"\\\"\"\"\\\"\"\"\\\"\"\"\\\"\"\"\\\"\"\"\\\"\"\"\\\"\"\"\\\"\"\"\\\"\"\"\\\"\"\"\\\"\"\"\\\"\"\"\\\"\"\"\\\"\"\"\\\"\"\"\\\"\"\"\\\"\"\"\\\"\"\"\\\"\"\"\\\"\"\"\\\"\"\"\\\"\"\"\\\"\"\"\\\"\"\"\\\"\"\"\\\"\"\"\\\"\"\"\\\"\"\"\\\"\"\"\\\"\"\"\\\"\"\"\\\"\"\"\\\"\"\"\\\"\"\"\\\"\"\"\\\"\"\"\\\"\"\"\\\"\"\"\\\"\"\"\\\"\"\"\\\"\"\"\\\"\"\"\\\"\"\"\\\"\"\"\\\"\"\"\\\"\"\"\\\"\"\"\\\"\"\"\\\"\"\"\\\"\"\"\\\"\"\"\\\"\"\"\\\"\"\"\\\"\"\"\\\"\"\"\\\"\"\"\\\"\"\"\\\"\"\"\\\"\"\"\\\"\"\"\\\"\"\"\\\"\"\"\\\"\"\"\"\"",
 }
 
-"#]],
+"#
+        ]],
     );
 }
 
-proptest! {
+proptest!
+{
     /// Verify defaults are compatible with the old TOML parser so new Cargo doesn't cause an MSRV
     /// bump
-    #[test]
-    fn parseable(decoded in "\\PC*") {
-        let key = TomlKeyBuilder::new(&decoded);
-        let string = TomlStringBuilder::new(&decoded);
+   #[test]
+    fn parseable(decoded in"\\PC*")
+    {
+        let key = TomlKeyBuilder:: new ( & decoded);
+        let string = TomlStringBuilder:: new ( & decoded);
 
         let key_default = key.as_default().to_toml_key();
         let string_default = string.as_default().to_toml_value();
 
         let toml = format!("{key_default} = {string_default}");
-        dbg!(&toml);
+        dbg!( & toml);
         let value = toml.parse::<toml_old::Value>();
-        let value = match value {
-            Ok(value) => value,
-            Err(err) => panic!("could not parse: {err}"),
-        };
+        let value = match value { Ok(value) => value, Err(err) => panic ! ("could not parse: {err}"), };
         let table = value.as_table().unwrap();
         let (key, value) = table.iter().next().unwrap();
-        assert_eq!(*key, decoded);
+        assert_eq!( * key, decoded);
         assert_eq!(value.as_str().unwrap(), decoded);
     }
 }

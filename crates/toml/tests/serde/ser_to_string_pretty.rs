@@ -1,80 +1,69 @@
 use serde::Deserialize;
 use serde::Serialize;
 use snapbox::assert_data_eq;
-use snapbox::prelude::*;
+use snapbox::prelude:: * ;
 use snapbox::str;
 
 #[track_caller]
-fn t(toml: &str, data: impl IntoData) {
+fn t(toml: & str, data: impl IntoData)
+{
     let value: crate::SerdeDocument = crate::from_str(toml).unwrap();
-    let result = crate::to_string_pretty(&value).unwrap();
+    let result = crate::to_string_pretty( & value).unwrap();
     assert_data_eq!(result, data.raw());
 }
 
 #[test]
-fn no_unnecessary_newlines_array() {
-    #[derive(Debug, Clone, Hash, PartialEq, Eq, Serialize, Deserialize)]
-    struct Users {
-        pub(crate) user: Vec<User>,
-    }
+fn no_unnecessary_newlines_array()
+{
+   #[derive(Debug, Clone, Hash, PartialEq, Eq, Serialize, Deserialize)]
+    struct Users { pub (crate) user: Vec<User>, }
 
-    #[derive(Debug, Clone, Hash, PartialEq, Eq, Serialize, Deserialize)]
-    struct User {
-        pub(crate) name: String,
-        pub(crate) surname: String,
-    }
+   #[derive(Debug, Clone, Hash, PartialEq, Eq, Serialize, Deserialize)]
+    struct User { pub (crate) name: String, pub (crate) surname: String, }
 
-    assert!(
-        !crate::to_string_pretty(&Users {
-            user: vec![
-                User {
-                    name: "John".to_owned(),
-                    surname: "Doe".to_owned(),
-                },
-                User {
-                    name: "Jane".to_owned(),
-                    surname: "Dough".to_owned(),
-                },
-            ],
-        })
+    assert!
+    (
+        ! crate::to_string_pretty
+        (
+            & Users
+            {
+                user: vec![User { name: "John".to_owned(), surname: "Doe".to_owned(), }, User { name: "Jane".to_owned(), surname: "Dough".to_owned(), },],
+            }
+        )
         .unwrap()
         .starts_with('\n')
     );
 }
 
 #[test]
-fn no_unnecessary_newlines_table() {
-    #[derive(Debug, Clone, Hash, PartialEq, Eq, Serialize, Deserialize)]
-    struct TwoUsers {
-        pub(crate) user0: User,
-        pub(crate) user1: User,
-    }
+fn no_unnecessary_newlines_table()
+{
+   #[derive(Debug, Clone, Hash, PartialEq, Eq, Serialize, Deserialize)]
+    struct TwoUsers { pub (crate) user0: User, pub (crate) user1: User, }
 
-    #[derive(Debug, Clone, Hash, PartialEq, Eq, Serialize, Deserialize)]
-    struct User {
-        pub(crate) name: String,
-        pub(crate) surname: String,
-    }
+   #[derive(Debug, Clone, Hash, PartialEq, Eq, Serialize, Deserialize)]
+    struct User { pub (crate) name: String, pub (crate) surname: String, }
 
-    assert!(
-        !crate::to_string_pretty(&TwoUsers {
-            user0: User {
-                name: "John".to_owned(),
-                surname: "Doe".to_owned(),
-            },
-            user1: User {
-                name: "Jane".to_owned(),
-                surname: "Dough".to_owned(),
-            },
-        })
+    assert!
+    (
+        ! crate::to_string_pretty
+        (
+            & TwoUsers
+            {
+                user0: User { name: "John".to_owned(), surname: "Doe".to_owned(), },
+                user1: User { name: "Jane".to_owned(), surname: "Dough".to_owned(), },
+            }
+        )
         .unwrap()
         .starts_with('\n')
     );
 }
 
 #[test]
-fn basic() {
-    t(
+fn basic()
+{
+    t
+    (
         "\
 [example]
 array = [\"item 1\", \"item 2\"]
@@ -85,7 +74,9 @@ text = '''
 this is the first line\\nthis is the second line
 '''
 ",
-        str![[r#"
+        str!
+        [[
+            r#"
 [example]
 array = [
     "item 1",
@@ -98,13 +89,16 @@ text = '''
 this is the first line\nthis is the second line
 '''
 
-"#]],
+"#
+        ]],
     );
 }
 
 #[test]
-fn tricky() {
-    t(
+fn tricky()
+{
+    t
+    (
         r#"[example]
 f = "\f"
 glass = """
@@ -131,7 +125,9 @@ Also ' and " because why not
 this is the fourth line
 """
 "#,
-        str![[r#"
+        str!
+        [[
+            r#"
 [example]
 f = "\f"
 glass = """
@@ -158,13 +154,16 @@ Also ' and " because why not
 this is the fourth line
 """
 
-"#]],
+"#
+        ]],
     );
 }
 
 #[test]
-fn table_array() {
-    t(
+fn table_array()
+{
+    t
+    (
         r#"
 [abc]
 doc = "this is a table"
@@ -178,7 +177,9 @@ key = "bar"
 [example]
 single = "this is a single line string"
 "#,
-        str![[r#"
+        str!
+        [[
+            r#"
 [abc]
 doc = "this is a table"
 
@@ -191,25 +192,33 @@ key = "bar"
 [example]
 single = "this is a single line string"
 
-"#]],
+"#
+        ]],
     );
 }
 
 #[test]
-fn empty_table() {
-    t(
+fn empty_table()
+{
+    t
+    (
         r#"[example]
 "#,
-        str![[r#"
+        str!
+        [[
+            r#"
 [example]
 
-"#]],
+"#
+        ]],
     );
 }
 
 #[test]
-fn implicit_tables() {
-    t(
+fn implicit_tables()
+{
+    t
+    (
         r#"
 authors = []
 name = "foo"
@@ -218,7 +227,9 @@ version = "0.0.0"
 [profile.dev]
 debug = true
 "#,
-        str![[r#"
+        str!
+        [[
+            r#"
 authors = []
 name = "foo"
 version = "0.0.0"
@@ -226,6 +237,7 @@ version = "0.0.0"
 [profile.dev]
 debug = true
 
-"#]],
+"#
+        ]],
     );
 }

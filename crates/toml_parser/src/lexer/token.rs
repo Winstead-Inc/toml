@@ -9,30 +9,23 @@ use crate::decoder::Encoding;
 
 /// An unvalidated TOML Token
 #[derive(Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Debug)]
-pub struct Token {
-    pub(super) kind: TokenKind,
-    pub(super) span: Span,
-}
+pub struct Token { pub (super) kind: TokenKind, pub (super) span: Span, }
 
-impl Token {
-    pub(super) fn new(kind: TokenKind, span: Span) -> Self {
-        Self { kind, span }
-    }
+impl Token
+{
+    pub (super) fn new (kind: TokenKind, span: Span) -> Self { Self { kind, span } }
 
-    #[inline(always)]
-    pub fn kind(&self) -> TokenKind {
-        self.kind
-    }
+   #[inline(always)]
+    pub fn kind( & self) -> TokenKind { self.kind }
 
-    #[inline(always)]
-    pub fn span(&self) -> Span {
-        self.span
-    }
+   #[inline(always)]
+    pub fn span( & self) -> Span { self.span }
 }
 
 #[derive(Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Debug)]
 #[repr(u8)]
-pub enum TokenKind {
+pub enum TokenKind
+{
     /// Either for dotted-key or float
     Dot = b'.',
     /// Key-value separator
@@ -61,9 +54,12 @@ pub enum TokenKind {
     Eof,
 }
 
-impl TokenKind {
-    pub const fn description(&self) -> &'static str {
-        match self {
+impl TokenKind
+{
+    pub const fn description( & self) -> & 'static str
+    {
+        match self
+        {
             Self::Dot => "`.`",
             Self::Equals => "`=`",
             Self::Comma => "`,`",
@@ -83,8 +79,10 @@ impl TokenKind {
         }
     }
 
-    pub fn encoding(&self) -> Option<Encoding> {
-        match self {
+    pub fn encoding( & self) -> Option<Encoding>
+    {
+        match self
+        {
             Self::LiteralString => Some(Encoding::LiteralString),
             Self::BasicString => Some(Encoding::BasicString),
             Self::MlLiteralString => Some(Encoding::MlLiteralString),

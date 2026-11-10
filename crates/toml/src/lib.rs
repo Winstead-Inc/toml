@@ -155,12 +155,13 @@
 #[allow(unused_extern_crates)]
 extern crate alloc;
 
-pub(crate) mod alloc_prelude {
-    pub(crate) use alloc::borrow::ToOwned as _;
-    pub(crate) use alloc::format;
-    pub(crate) use alloc::string::String;
-    pub(crate) use alloc::string::ToString as _;
-    pub(crate) use alloc::vec::Vec;
+pub (crate) mod alloc_prelude
+{
+    pub (crate) use alloc::borrow::ToOwned as _;
+    pub (crate) use alloc::format;
+    pub (crate) use alloc::string::String;
+    pub (crate) use alloc::string::ToString as _;
+    pub (crate) use alloc::vec::Vec;
 }
 
 pub mod map;
@@ -181,15 +182,16 @@ mod table;
 #[doc(inline)]
 #[cfg(feature = "parse")]
 #[cfg(feature = "serde")]
-pub use crate::de::{Deserializer, from_slice, from_str};
+pub use crate::de:: { Deserializer, from_slice, from_str };
 #[doc(inline)]
 #[cfg(feature = "display")]
 #[cfg(feature = "serde")]
-pub use crate::ser::{Serializer, to_string, to_string_pretty};
+pub use crate::ser:: { Serializer, to_string, to_string_pretty };
 #[doc(inline)]
 #[cfg(feature = "serde")]
 pub use crate::value::Value;
 pub use serde_spanned::Spanned;
+
 #[cfg(feature = "serde")]
 pub use table::Table;
 
@@ -199,6 +201,6 @@ use core::str::FromStr;
 #[allow(unused_imports)]
 use toml_datetime::Datetime;
 
-#[doc = include_str!("../README.md")]
+#[doc = include_str ! ("../README.md")]
 #[cfg(doctest)]
 pub struct ReadmeDoctests;

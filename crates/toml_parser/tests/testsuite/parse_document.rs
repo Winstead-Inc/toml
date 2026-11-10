@@ -1,46 +1,46 @@
 use snapbox::file;
 
 use toml_parser::Source;
-use toml_parser::parser::*;
+use toml_parser::parser:: * ;
 
 #[track_caller]
-fn t(input: &str, expected: impl snapbox::data::IntoData) {
+fn t(input: & str, expected: impl snapbox::data::IntoData)
+{
     dbg!(input);
-    let mut actual = crate::EventResults::new(input);
+    let mut actual = crate::EventResults:: new (input);
 
-    let doc = Source::new(input);
+    let doc = Source:: new (input);
     let tokens = doc.lex().into_vec();
-    parse_document(&tokens, &mut actual.events, &mut actual.errors);
+    parse_document( & tokens, & mut actual.events, & mut actual.errors);
 
     actual.validate(expected);
 }
 
 #[track_caller]
-fn t_recurse(input: &str, max_depth: u32, expected: impl snapbox::data::IntoData) {
+fn t_recurse(input: & str, max_depth: u32, expected: impl snapbox::data::IntoData)
+{
     dbg!(input);
-    let mut actual = crate::EventResults::new(input);
+    let mut actual = crate::EventResults:: new (input);
 
-    let doc = Source::new(input);
+    let doc = Source:: new (input);
     let tokens = doc.lex().into_vec();
-    let mut recursion = RecursionGuard::new(&mut actual.events, max_depth);
-    parse_document(&tokens, &mut recursion, &mut actual.errors);
+    let mut recursion = RecursionGuard:: new ( & mut actual.events, max_depth);
+    parse_document( & tokens, & mut recursion, & mut actual.errors);
 
     actual.validate(expected);
 }
 
 #[test]
-fn document_empty() {
-    t("", file![_].raw());
-}
+fn document_empty() { t("", file ! [_].raw()); }
 
 #[test]
-fn document_ws() {
-    t(r#"  "#, file![_].raw());
-}
+fn document_ws() { t(r#"  "#, file ! [_].raw()); }
 
 #[test]
-fn document_key_string() {
-    t(
+fn document_key_string()
+{
+    t
+    (
         r#"hello.world = "a"
 "#,
         file![_].raw(),
@@ -48,8 +48,10 @@ fn document_key_string() {
 }
 
 #[test]
-fn document_key_string_comment() {
-    t(
+fn document_key_string_comment()
+{
+    t
+    (
         r#" hello = 'darkness' # my old friend
 "#,
         file![_].raw(),
@@ -57,8 +59,10 @@ fn document_key_string_comment() {
 }
 
 #[test]
-fn document_key_ws() {
-    t(
+fn document_key_ws()
+{
+    t
+    (
         r#" hello . darkness . my = 'old friend'
 "#,
         file![_].raw(),
@@ -66,8 +70,10 @@ fn document_key_ws() {
 }
 
 #[test]
-fn document_table() {
-    t(
+fn document_table()
+{
+    t
+    (
         r#"[parent . child]
 key = "value"
 "#,
@@ -76,8 +82,10 @@ key = "value"
 }
 
 #[test]
-fn document_table_missing_key() {
-    t(
+fn document_table_missing_key()
+{
+    t
+    (
         r#"[]
 key = "value"
 "#,
@@ -86,8 +94,10 @@ key = "value"
 }
 
 #[test]
-fn document_table_dot() {
-    t(
+fn document_table_dot()
+{
+    t
+    (
         r#"[ . ]
 key = "value"
 "#,
@@ -96,8 +106,10 @@ key = "value"
 }
 
 #[test]
-fn document_table_dot_dot() {
-    t(
+fn document_table_dot_dot()
+{
+    t
+    (
         r#"[ . . ]
 key = "value"
 "#,
@@ -106,8 +118,10 @@ key = "value"
 }
 
 #[test]
-fn document_table_dot_key() {
-    t(
+fn document_table_dot_key()
+{
+    t
+    (
         r#"[ . table ]
 key = "value"
 "#,
@@ -116,8 +130,10 @@ key = "value"
 }
 
 #[test]
-fn document_table_dot_dot_key() {
-    t(
+fn document_table_dot_dot_key()
+{
+    t
+    (
         r#"[ . table ]
 key = "value"
 "#,
@@ -126,8 +142,10 @@ key = "value"
 }
 
 #[test]
-fn document_table_key_dot() {
-    t(
+fn document_table_key_dot()
+{
+    t
+    (
         r#"[ table . ]
 key = "value"
 "#,
@@ -136,8 +154,10 @@ key = "value"
 }
 
 #[test]
-fn document_table_key_dot_dot() {
-    t(
+fn document_table_key_dot_dot()
+{
+    t
+    (
         r#"[ table . . ]
 key = "value"
 "#,
@@ -146,8 +166,10 @@ key = "value"
 }
 
 #[test]
-fn document_table_key_dot_dot_key() {
-    t(
+fn document_table_key_dot_dot_key()
+{
+    t
+    (
         r#"[ table . . table ]
 key = "value"
 "#,
@@ -156,8 +178,10 @@ key = "value"
 }
 
 #[test]
-fn document_missing_key() {
-    t(
+fn document_missing_key()
+{
+    t
+    (
         r#"
  = "value"
 "#,
@@ -166,8 +190,10 @@ fn document_missing_key() {
 }
 
 #[test]
-fn document_dot() {
-    t(
+fn document_dot()
+{
+    t
+    (
         r#"
  . = "value"
 "#,
@@ -176,8 +202,10 @@ fn document_dot() {
 }
 
 #[test]
-fn document_dot_dot() {
-    t(
+fn document_dot_dot()
+{
+    t
+    (
         r#"
  . . = "value"
 "#,
@@ -186,8 +214,10 @@ fn document_dot_dot() {
 }
 
 #[test]
-fn document_dot_key() {
-    t(
+fn document_dot_key()
+{
+    t
+    (
         r#"
  . key = "value"
 "#,
@@ -196,8 +226,10 @@ fn document_dot_key() {
 }
 
 #[test]
-fn document_dot_dot_key() {
-    t(
+fn document_dot_dot_key()
+{
+    t
+    (
         r#"
  . . key = "value"
 "#,
@@ -206,8 +238,10 @@ fn document_dot_dot_key() {
 }
 
 #[test]
-fn document_key_dot() {
-    t(
+fn document_key_dot()
+{
+    t
+    (
         r#"
 key . = "value"
 "#,
@@ -216,8 +250,10 @@ key . = "value"
 }
 
 #[test]
-fn document_key_dot_dot() {
-    t(
+fn document_key_dot_dot()
+{
+    t
+    (
         r#"
 key . . = "value"
 "#,
@@ -226,8 +262,10 @@ key . . = "value"
 }
 
 #[test]
-fn document_key_dot_dot_key() {
-    t(
+fn document_key_dot_dot_key()
+{
+    t
+    (
         r#"
 key . . key = "value"
 "#,
@@ -236,8 +274,10 @@ key . . key = "value"
 }
 
 #[test]
-fn document_inline_table_missing_key() {
-    t(
+fn document_inline_table_missing_key()
+{
+    t
+    (
         r#"
 parent = { = "value" }
 "#,
@@ -246,8 +286,10 @@ parent = { = "value" }
 }
 
 #[test]
-fn document_inline_table_dot() {
-    t(
+fn document_inline_table_dot()
+{
+    t
+    (
         r#"
 parent = { . = "value" }
 "#,
@@ -256,8 +298,10 @@ parent = { . = "value" }
 }
 
 #[test]
-fn document_inline_table_dot_dot() {
-    t(
+fn document_inline_table_dot_dot()
+{
+    t
+    (
         r#"
 parent = { . . = "value" }
 "#,
@@ -266,8 +310,10 @@ parent = { . . = "value" }
 }
 
 #[test]
-fn document_inline_table_dot_key() {
-    t(
+fn document_inline_table_dot_key()
+{
+    t
+    (
         r#"
 parent = { . key = "value" }
 "#,
@@ -276,8 +322,10 @@ parent = { . key = "value" }
 }
 
 #[test]
-fn document_inline_table_dot_dot_key() {
-    t(
+fn document_inline_table_dot_dot_key()
+{
+    t
+    (
         r#"
 parent = { . . key = "value" }
 "#,
@@ -286,8 +334,10 @@ parent = { . . key = "value" }
 }
 
 #[test]
-fn document_inline_table_key_dot() {
-    t(
+fn document_inline_table_key_dot()
+{
+    t
+    (
         r#"
 parent = { key . = "value" }
 "#,
@@ -296,8 +346,10 @@ parent = { key . = "value" }
 }
 
 #[test]
-fn document_inline_table_key_dot_dot() {
-    t(
+fn document_inline_table_key_dot_dot()
+{
+    t
+    (
         r#"
 parent = { key . . = "value" }
 "#,
@@ -306,8 +358,10 @@ parent = { key . . = "value" }
 }
 
 #[test]
-fn document_inline_table_key_dot_dot_key() {
-    t(
+fn document_inline_table_key_dot_dot_key()
+{
+    t
+    (
         r#"
 parent = { key . . key = "value" }
 "#,
@@ -316,8 +370,10 @@ parent = { key . . key = "value" }
 }
 
 #[test]
-fn document_key_datetime() {
-    t(
+fn document_key_datetime()
+{
+    t
+    (
         r#"foo = 1979-05-27 # Comment
 "#,
         file![_].raw(),
@@ -325,8 +381,10 @@ fn document_key_datetime() {
 }
 
 #[test]
-fn document_bom() {
-    t(
+fn document_bom()
+{
+    t
+    (
         "\u{FEFF}
 [package]
 name = \"foo\"
@@ -338,8 +396,10 @@ authors = []
 }
 
 #[test]
-fn document_complex() {
-    t(
+fn document_complex()
+{
+    t
+    (
         r#"
 # This is a TOML document.
 
@@ -389,8 +449,10 @@ that
 }
 
 #[test]
-fn document_invalid() {
-    t(
+fn document_invalid()
+{
+    t
+    (
         r#" hello = 'darkness' # my old friend
 $"#,
         file![_].raw(),
@@ -398,8 +460,10 @@ $"#,
 }
 
 #[test]
-fn document_invalid_comment() {
-    t(
+fn document_invalid_comment()
+{
+    t
+    (
         " hello = 'darkness' # my old\0 friend
 ",
         file![_].raw(),
@@ -407,13 +471,13 @@ fn document_invalid_comment() {
 }
 
 #[test]
-fn document_invalid_cr() {
-    t(" hello = 'darkness' # my old friend\r", file![_].raw());
-}
+fn document_invalid_cr() { t(" hello = 'darkness' # my old friend\r", file ! [_].raw()); }
 
 #[test]
-fn inline_table_within_recursion_limit() {
-    t_recurse(
+fn inline_table_within_recursion_limit()
+{
+    t_recurse
+    (
         "
 key = { a = { b = 1 } }
 after = [10]
@@ -424,8 +488,10 @@ after = [10]
 }
 
 #[test]
-fn inline_table_outside_recursion_limit() {
-    t_recurse(
+fn inline_table_outside_recursion_limit()
+{
+    t_recurse
+    (
         "
 key = { a = { b = { c = { d = 1 } } } }
 after = [10]
@@ -436,8 +502,10 @@ after = [10]
 }
 
 #[test]
-fn array_within_recursion_limit() {
-    t_recurse(
+fn array_within_recursion_limit()
+{
+    t_recurse
+    (
         "
 key = [[1]]
 after = [10]
@@ -448,8 +516,10 @@ after = [10]
 }
 
 #[test]
-fn array_outside_recursion_limit() {
-    t_recurse(
+fn array_outside_recursion_limit()
+{
+    t_recurse
+    (
         "
 key = [[[[1]]]]
 after = [10]
@@ -460,8 +530,10 @@ after = [10]
 }
 
 #[test]
-fn array_and_inline_table_within_recursion_limit() {
-    t_recurse(
+fn array_and_inline_table_within_recursion_limit()
+{
+    t_recurse
+    (
         "
 key = [{ a = 1 }]
 after = [10]
@@ -472,8 +544,10 @@ after = [10]
 }
 
 #[test]
-fn array_and_inline_table_outside_recursion_limit() {
-    t_recurse(
+fn array_and_inline_table_outside_recursion_limit()
+{
+    t_recurse
+    (
         "
 key = [{ a = [{ b = [{ c = 1 }] }] }]
 after = [10]
@@ -484,8 +558,10 @@ after = [10]
 }
 
 #[test]
-fn hex_with_spaces() {
-    t(
+fn hex_with_spaces()
+{
+    t
+    (
         "
 v=0x _
 ",
@@ -494,8 +570,10 @@ v=0x _
 }
 
 #[test]
-fn hex_with_bad_chars() {
-    t(
+fn hex_with_bad_chars()
+{
+    t
+    (
         "
 v=0xz_
 ",
@@ -504,8 +582,10 @@ v=0xz_
 }
 
 #[test]
-fn float_with_bad_underscore() {
-    t(
+fn float_with_bad_underscore()
+{
+    t
+    (
         "
 v=1_.2
 ",
@@ -514,21 +594,23 @@ v=1_.2
 }
 
 #[test]
-fn many_extra_equals() {
+fn many_extra_equals()
+{
     // Regression test: a long run of `=` does not cause stack overflow.
     let equals = "=".repeat(5_000);
     let input = format!("v{equals}1\n");
 
-    let mut actual = crate::EventResults::new(&input);
-    let doc = Source::new(&input);
+    let mut actual = crate::EventResults:: new ( & input);
+    let doc = Source:: new ( & input);
     let tokens = doc.lex().into_vec();
-    parse_document(&tokens, &mut actual.events, &mut actual.errors);
+    parse_document( & tokens, & mut actual.events, & mut actual.errors);
 
-    assert!(!actual.errors.is_empty());
+    assert!( ! actual.errors.is_empty());
 }
 
 #[test]
-fn allman_style_key_val_sep_allowed() {
+fn allman_style_key_val_sep_allowed()
+{
     let input = r#"
 submodules =
 [
@@ -547,10 +629,10 @@ serde =
     default-features = false,
 }
 "#;
-    let mut actual = crate::EventResults::new(input);
-    let doc = Source::new(input);
+    let mut actual = crate::EventResults:: new (input);
+    let doc = Source:: new (input);
     let tokens = doc.lex().into_vec();
-    parse_document(&tokens, &mut actual.events, &mut actual.errors);
+    parse_document( & tokens, & mut actual.events, & mut actual.errors);
 
-    assert!(actual.errors.is_empty(), "Allman style must not produce errors, got: {:?}", actual.errors);
+    assert!(actual.errors.is_empty(),"Allman style must not produce errors, got: {:?}", actual.errors);
 }

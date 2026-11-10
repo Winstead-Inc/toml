@@ -12,14 +12,15 @@ mod style;
 #[cfg(feature = "display")]
 mod value;
 
-use crate::alloc_prelude::*;
+use crate::alloc_prelude:: * ;
 
 #[cfg(feature = "display")]
 pub use document::Buffer;
 #[cfg(feature = "display")]
 pub use document::Serializer;
 pub use error::Error;
-pub(crate) use error::ErrorInner;
+pub (crate) use error::ErrorInner;
+
 #[cfg(feature = "display")]
 pub use value::ValueSerializer;
 
@@ -62,12 +63,12 @@ pub use value::ValueSerializer;
 /// println!("{}", toml)
 /// ```
 #[cfg(feature = "display")]
-pub fn to_string<T>(value: &T) -> Result<String, Error>
+pub fn to_string<T>(value: & T) -> Result<String, Error>
 where
-    T: serde_core::ser::Serialize + ?Sized,
+T: serde_core::ser::Serialize + ? Sized,
 {
-    let mut output = Buffer::new();
-    let serializer = Serializer::new(&mut output);
+    let mut output = Buffer:: new ();
+    let serializer = Serializer:: new ( & mut output);
     value.serialize(serializer)?;
     Ok(output.into_string())
 }
@@ -82,12 +83,12 @@ where
 /// For greater customization, instead serialize to a
 /// [`toml_edit::DocumentMut`](https://docs.rs/toml_edit/latest/toml_edit/struct.DocumentMut.html).
 #[cfg(feature = "display")]
-pub fn to_string_pretty<T>(value: &T) -> Result<String, Error>
+pub fn to_string_pretty<T>(value: & T) -> Result<String, Error>
 where
-    T: serde_core::ser::Serialize + ?Sized,
+T: serde_core::ser::Serialize + ? Sized,
 {
-    let mut output = Buffer::new();
-    let serializer = Serializer::pretty(&mut output);
+    let mut output = Buffer:: new ();
+    let serializer = Serializer::pretty( & mut output);
     value.serialize(serializer)?;
     Ok(output.into_string())
 }

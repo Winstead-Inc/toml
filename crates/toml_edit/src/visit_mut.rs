@@ -89,86 +89,55 @@
 //! For a more complex example where the visitor has internal state, see `examples/visit.rs`
 //! [on GitHub](https://github.com/toml-rs/toml/blob/main/crates/toml_edit/examples/visit.rs).
 
-use crate::{
-    Array, ArrayOfTables, Datetime, DocumentMut, Formatted, InlineTable, Item, KeyMut, Table,
-    TableLike, Value,
-};
+use crate:: { Array, ArrayOfTables, Datetime, DocumentMut, Formatted, InlineTable, Item, KeyMut, Table, TableLike, Value, };
 
 /// Document tree traversal to mutate an exclusive borrow of a document tree in-place.
 ///
 /// See the [module documentation](self) for details.
-pub trait VisitMut {
-    fn visit_document_mut(&mut self, node: &mut DocumentMut) {
-        visit_document_mut(self, node);
-    }
+pub trait VisitMut
+{
+    fn visit_document_mut( & mut self, node: & mut DocumentMut) { visit_document_mut(self, node); }
 
-    fn visit_item_mut(&mut self, node: &mut Item) {
-        visit_item_mut(self, node);
-    }
+    fn visit_item_mut( & mut self, node: & mut Item) { visit_item_mut(self, node); }
 
-    fn visit_table_mut(&mut self, node: &mut Table) {
-        visit_table_mut(self, node);
-    }
+    fn visit_table_mut( & mut self, node: & mut Table) { visit_table_mut(self, node); }
 
-    fn visit_inline_table_mut(&mut self, node: &mut InlineTable) {
-        visit_inline_table_mut(self, node);
-    }
+    fn visit_inline_table_mut( & mut self, node: & mut InlineTable) { visit_inline_table_mut(self, node); }
 
     /// [`visit_table_mut`](Self::visit_table_mut) and
     /// [`visit_inline_table_mut`](Self::visit_inline_table_mut) both recurse into this method.
-    fn visit_table_like_mut(&mut self, node: &mut dyn TableLike) {
-        visit_table_like_mut(self, node);
-    }
+    fn visit_table_like_mut( & mut self, node: & mut dyn TableLike) { visit_table_like_mut(self, node); }
 
-    fn visit_table_like_kv_mut(&mut self, key: KeyMut<'_>, node: &mut Item) {
-        visit_table_like_kv_mut(self, key, node);
-    }
+    fn visit_table_like_kv_mut( & mut self, key: KeyMut<'_>, node: & mut Item) { visit_table_like_kv_mut(self, key, node); }
 
-    fn visit_array_mut(&mut self, node: &mut Array) {
-        visit_array_mut(self, node);
-    }
+    fn visit_array_mut( & mut self, node: & mut Array) { visit_array_mut(self, node); }
 
-    fn visit_array_of_tables_mut(&mut self, node: &mut ArrayOfTables) {
-        visit_array_of_tables_mut(self, node);
-    }
+    fn visit_array_of_tables_mut( & mut self, node: & mut ArrayOfTables) { visit_array_of_tables_mut(self, node); }
 
-    fn visit_value_mut(&mut self, node: &mut Value) {
-        visit_value_mut(self, node);
-    }
+    fn visit_value_mut( & mut self, node: & mut Value) { visit_value_mut(self, node); }
 
-    fn visit_boolean_mut(&mut self, node: &mut Formatted<bool>) {
-        visit_boolean_mut(self, node);
-    }
+    fn visit_boolean_mut( & mut self, node: & mut Formatted<bool>) { visit_boolean_mut(self, node); }
 
-    fn visit_datetime_mut(&mut self, node: &mut Formatted<Datetime>) {
-        visit_datetime_mut(self, node);
-    }
+    fn visit_datetime_mut( & mut self, node: & mut Formatted<Datetime>) { visit_datetime_mut(self, node); }
 
-    fn visit_float_mut(&mut self, node: &mut Formatted<f64>) {
-        visit_float_mut(self, node);
-    }
+    fn visit_float_mut( & mut self, node: & mut Formatted<f64>) { visit_float_mut(self, node); }
 
-    fn visit_integer_mut(&mut self, node: &mut Formatted<i64>) {
-        visit_integer_mut(self, node);
-    }
+    fn visit_integer_mut( & mut self, node: & mut Formatted<i64>) { visit_integer_mut(self, node); }
 
-    fn visit_string_mut(&mut self, node: &mut Formatted<String>) {
-        visit_string_mut(self, node);
-    }
+    fn visit_string_mut( & mut self, node: & mut Formatted<String>) { visit_string_mut(self, node); }
 }
 
-pub fn visit_document_mut<V>(v: &mut V, node: &mut DocumentMut)
+pub fn visit_document_mut<V>(v: & mut V, node: & mut DocumentMut)
 where
-    V: VisitMut + ?Sized,
-{
-    v.visit_table_mut(node.as_table_mut());
-}
+V: VisitMut + ? Sized,
+{ v.visit_table_mut(node.as_table_mut()); }
 
-pub fn visit_item_mut<V>(v: &mut V, node: &mut Item)
+pub fn visit_item_mut<V>(v: & mut V, node: & mut Item)
 where
-    V: VisitMut + ?Sized,
+V: VisitMut + ? Sized,
 {
-    match node {
+    match node
+    {
         Item::None => {}
         Item::Value(value) => v.visit_value_mut(value),
         Item::Table(table) => v.visit_table_mut(table),
@@ -176,59 +145,42 @@ where
     }
 }
 
-pub fn visit_table_mut<V>(v: &mut V, node: &mut Table)
+pub fn visit_table_mut<V>(v: & mut V, node: & mut Table)
 where
-    V: VisitMut + ?Sized,
-{
-    v.visit_table_like_mut(node);
-}
+V: VisitMut + ? Sized,
+{ v.visit_table_like_mut(node); }
 
-pub fn visit_inline_table_mut<V>(v: &mut V, node: &mut InlineTable)
+pub fn visit_inline_table_mut<V>(v: & mut V, node: & mut InlineTable)
 where
-    V: VisitMut + ?Sized,
-{
-    v.visit_table_like_mut(node);
-}
+V: VisitMut + ? Sized,
+{ v.visit_table_like_mut(node); }
 
-pub fn visit_table_like_mut<V>(v: &mut V, node: &mut dyn TableLike)
+pub fn visit_table_like_mut<V>(v: & mut V, node: & mut dyn TableLike)
 where
-    V: VisitMut + ?Sized,
-{
-    for (key, item) in node.iter_mut() {
-        v.visit_table_like_kv_mut(key, item);
-    }
-}
+V: VisitMut + ? Sized,
+{ for (key, item) in node.iter_mut() { v.visit_table_like_kv_mut(key, item); } }
 
-pub fn visit_table_like_kv_mut<V>(v: &mut V, _key: KeyMut<'_>, node: &mut Item)
+pub fn visit_table_like_kv_mut<V>(v: & mut V, _key: KeyMut<'_>, node: & mut Item)
 where
-    V: VisitMut + ?Sized,
-{
-    v.visit_item_mut(node);
-}
+V: VisitMut + ? Sized,
+{ v.visit_item_mut(node); }
 
-pub fn visit_array_mut<V>(v: &mut V, node: &mut Array)
+pub fn visit_array_mut<V>(v: & mut V, node: & mut Array)
 where
-    V: VisitMut + ?Sized,
-{
-    for value in node.iter_mut() {
-        v.visit_value_mut(value);
-    }
-}
+V: VisitMut + ? Sized,
+{ for value in node.iter_mut() { v.visit_value_mut(value); } }
 
-pub fn visit_array_of_tables_mut<V>(v: &mut V, node: &mut ArrayOfTables)
+pub fn visit_array_of_tables_mut<V>(v: & mut V, node: & mut ArrayOfTables)
 where
-    V: VisitMut + ?Sized,
-{
-    for table in node.iter_mut() {
-        v.visit_table_mut(table);
-    }
-}
+V: VisitMut + ? Sized,
+{ for table in node.iter_mut() { v.visit_table_mut(table); } }
 
-pub fn visit_value_mut<V>(v: &mut V, node: &mut Value)
+pub fn visit_value_mut<V>(v: & mut V, node: & mut Value)
 where
-    V: VisitMut + ?Sized,
+V: VisitMut + ? Sized,
 {
-    match node {
+    match node
+    {
         Value::String(s) => v.visit_string_mut(s),
         Value::Integer(i) => v.visit_integer_mut(i),
         Value::Float(f) => v.visit_float_mut(f),
@@ -239,14 +191,10 @@ where
     }
 }
 
-macro_rules! empty_visit_mut {
-    ($name: ident, $t: ty) => {
-        fn $name<V>(_v: &mut V, _node: &mut $t)
-        where
-            V: VisitMut + ?Sized,
-        {
-        }
-    };
+macro_rules! empty_visit_mut
+{
+    ($name: ident, $t: ty)
+    => { fn $name<V>(_v: & mut V, _node: & mut $t) where V: VisitMut + ? Sized, {} };
 }
 
 empty_visit_mut!(visit_boolean_mut, Formatted<bool>);
