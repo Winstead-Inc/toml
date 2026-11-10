@@ -88,18 +88,9 @@ pub(crate) fn document<'s>(
                 key.leaf_decor.set_prefix(key_prefix);
                 key.leaf_decor.set_suffix(key_suffix);
 
-                let value_prefix = if input
-                    .first()
-                    .map(|e| e.kind() == EventKind::Whitespace)
-                    .unwrap_or(false)
-                {
-                    input
-                        .next_token()
-                        .map(|e| RawString::with_span(e.span().start()..e.span().end()))
-                } else {
-                    None
-                }
-                .unwrap_or_default();
+                let value_prefix = ws_comment_newline(input)
+                    .map(|s| RawString::with_span(s.start()..s.end()))
+                    .unwrap_or_default();
                 let mut value = value(input, source, errors);
                 let value_suffix = ws_comment_newline(input)
                     .map(|s| RawString::with_span(s.start()..s.end()))

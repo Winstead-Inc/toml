@@ -74,9 +74,9 @@ pub(crate) fn document<'i>(
                     break;
                 }
 
-                if input
+                while input
                     .first()
-                    .map(|e| e.kind() == EventKind::Whitespace)
+                    .map(|e| matches!(e.kind(), EventKind::Whitespace | EventKind::Comment | EventKind::Newline))
                     .unwrap_or(false)
                 {
                     let _ = input.next_token();

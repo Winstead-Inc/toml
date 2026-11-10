@@ -449,7 +449,8 @@ fn on_expression_key_val_sep<'i>(
 ) {
     receiver.key_val_sep(eq_token.span(), error);
 
-    opt_whitespace(tokens, receiver, error);
+    // Allow newlines, whitespace, and comments between '=' and value (Allman style support)
+    ws_comment_newline(tokens, receiver, error);
 
     value(tokens, receiver, error);
 

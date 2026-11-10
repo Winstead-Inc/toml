@@ -526,3 +526,31 @@ fn many_extra_equals() {
 
     assert!(!actual.errors.is_empty());
 }
+
+#[test]
+fn allman_style_key_val_sep_allowed() {
+    let input = r#"
+submodules =
+[
+    "src/doc/book",
+    "src/doc/nomicon",
+]
+
+target-overrides =
+[{
+    triple = "x86_64-unknown-linux-gnu",
+}]
+
+serde =
+{
+    version = "1.0",
+    default-features = false,
+}
+"#;
+    let mut actual = crate::EventResults::new(input);
+    let doc = Source::new(input);
+    let tokens = doc.lex().into_vec();
+    parse_document(&tokens, &mut actual.events, &mut actual.errors);
+
+    assert!(actual.errors.is_empty(), "Allman style must not produce errors, got: {:?}", actual.errors);
+}
